@@ -1,7 +1,7 @@
 #include "gldrawer.h"
 
 GLDrawer::GLDrawer(QWidget *parent)
-	: QGLWidget(parent)
+	: QGLWidget(parent), CA(0)
 {
 	//flicker problem because of a widget attribute...this may be the soltuion.
 	setAttribute(Qt::WidgetAttribute::WA_OpaquePaintEvent );
@@ -22,10 +22,12 @@ void GLDrawer::initalizeGL() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0, 0, 0, 0);
 }
+
 void GLDrawer::paintGL(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	//this should not be passed
+	if(CA != NULL) {
+	////this should not be passed
 	float cellSpace = (float) width() / CA->getDIM();
 	
 	for(int i = 0; i < CA->getDIM(); ++i) {
@@ -36,7 +38,7 @@ void GLDrawer::paintGL(){
 			}
 		}
 	}
-
+	}
 	//glTranslatef(1.0f,0.0f,0.0f);
 
  //   glBegin(GL_POLYGON);

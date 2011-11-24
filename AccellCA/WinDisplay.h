@@ -3,27 +3,26 @@
 
 #include <QtGui/QMainWindow>
 #include "ui_WinDisplay.h"
-#include <qtimer.h>
-#include "CellularAutomata_GPGPU.h"
-#include "OuterTotalistic.h"
+#include "ICAView.h"
 
-typedef int (__cdecl *MYPROC)(LPWSTR); 
 
-class WinDisplay : public QMainWindow
+//typedef int (__cdecl *MYPROC)(LPWSTR); 
+
+class WinDisplay : public QMainWindow, public ICAView
 {
 	Q_OBJECT
+	Q_INTERFACES(ICAView)
 
 	public:
 		WinDisplay(QWidget *parent = 0, Qt::WFlags flags = 0);
 		~WinDisplay();
+		void setWindowTitle1(QString &title);
+		void updateView(CellularAutomata *ca);
+		void setController(CAController& controller);
 
 	private:
 		Ui::WinDisplayClass ui;
-		QTimer *timer;
-		CellularAutomata *CA;
-
-	private slots:
-		void tick();
+		//CAController& m_controller; //this should probably be in abstract class
 };
 
 #endif // WINDISPLAY_H
