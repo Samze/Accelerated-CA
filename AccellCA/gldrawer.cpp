@@ -33,6 +33,15 @@ void GLDrawer::paintGL(){
 	for(int i = 0; i < CA->getDIM(); ++i) {
 		for(int j = 0; j < CA->getDIM(); ++j) {
 			if (CA->getGrid()[i * CA->getDIM() + j] >= 1) {
+
+				/*int fif = 15;
+
+				int res = CA->getGrid()[i * CA->getDIM() + j] & 0xF;
+
+				int res2 = CA->getGrid()[i * CA->getDIM() + j] & 1;*/
+
+				unsigned int myint = CA->getGrid()[i * CA->getDIM() + j];
+				
 				//draw!
 				drawCell(i,j,cellSpace,CA->getGrid()[i * CA->getDIM() + j]);
 			}
@@ -50,6 +59,7 @@ void GLDrawer::paintGL(){
 
 void GLDrawer::drawCell(int x, int y, float cellSpace, int state) {
 
+	
 	int r = 0;
 	int g = 0;
 	int b = 0;

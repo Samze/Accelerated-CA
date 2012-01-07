@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 	CAController& controller = CAController::getInstance();
 	
 	controller.setView(&w);
+
 	w.show();
 
 	return a.exec();

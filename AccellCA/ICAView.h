@@ -2,7 +2,7 @@
 #define ICAVIEW_H
 
 #include <qstring.h>
-#include "CellularAutomataDLL.h"
+#include "CellularAutomata.h"
 #include "CAController.h"
 
 class CAController;

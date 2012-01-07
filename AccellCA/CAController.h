@@ -30,7 +30,7 @@ private:
 	CAController(QObject *parent); 
 	~CAController();
 	void operator=(CAController const&); //do not implement
-	Generations getCAClass();
+	Abstract2DCA* getCAClass();
 
 private:
 	ICAView *m_view;
