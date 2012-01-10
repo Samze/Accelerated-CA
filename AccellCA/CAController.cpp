@@ -1,6 +1,17 @@
 #include "CAController.h"
 
-CAController::CAController() { }
+CAController::CAController() {
+	state = IDLE;
+	
+	//setup timer
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()),this,SLOT(tick()));
+
+	timerTick = 1; //in Milliseconds
+	cellularDim = 200; //Specifies the width/height for our CA
+	initSeed = 5; //Random "0 to initseed" chance of each cell being live to start with, lower is a higher chance.
+	
+}
 
 CAController::CAController(QObject *parent)
 	: QObject(parent) {}
@@ -16,30 +27,46 @@ void CAController::setView(ICAView *view) {
 }
 
 void CAController::start() {
-	int timerTick = 1; //in Milliseconds
-	int CellularDim = 100; //Specifies the width/height for our CA
-	int initSeed = 5; //Random "0 to initseed" chance of each cell being live to start with, lower is a higher chance.
+
+	if (state == IDLE) {
+		//Create random CA, lower range is more concentrated
+		//CA = new CellularAutomata_GPGPU(cellularDim,initSeed);
+		m_view->updateView(CA);
+	}
 	
-	//Create random CA, lower range is more concentrated
-	CA = new CellularAutomata_GPGPU(CellularDim,initSeed);
-	
-	//setup timer
-	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()),this,SLOT(tick()));
+	state = ACTIVE;
 	timer->start(timerTick);
 
 }
 
 void CAController::stop() {
-	timer->stop();
+	if (state == IDLE) return;
+
+	if (state == ACTIVE){
+		timer->stop();
+		state = STOPPED;
+	}
 }
 
 void CAController::step() {
+	if (state == IDLE) return;
+
+	if(state == ACTIVE) {
+		stop();
+	}
 	tick();
 }
 
 void CAController::restart() {
+	if(state == IDLE) return;
 
+	if (state == ACTIVE) {
+		stop();	
+	}
+	
+	CA = new CellularAutomata_GPGPU(cellularDim,initSeed);
+	m_view->updateView(CA);
+	state = IDLE;
 }
 
 
@@ -63,17 +90,20 @@ void CAController::tick(){
 
 	Generations* v = dynamic_cast<Generations*>(gen);
 	OuterTotalistic* v2 = dynamic_cast<OuterTotalistic*>(gen);
+
+	
+	float timeTaken;
+
 	if(v != 0) {
 	// old was safely casted to NewType
 		//qDebug("%3.3f",CA->nextTimeStep(*v));
-		CA->nextTimeStep(*v);
+		timeTaken = CA->nextTimeStep(*v);
 	}
 	else {
-		CA->nextTimeStep(*v2);
+		timeTaken = CA->nextTimeStep(*v2);
 	}
-	
-	//float timeTaken = 
-	//qDebug("Time taken:%3.1f ms\n",timeTaken);
+
+	qDebug("Time taken:%3.1f ms\n",timeTaken);
 
 }
 
@@ -82,32 +112,57 @@ Abstract2DCA* CAController::getCAClass() {
 	Abstract2DCA *outer = new OuterTotalistic();
 	Abstract2DCA *gen = new Generations();
 		//OuterTotalistic outer;
-	int* surviveNo = new int[1];
-	int* bornNo = new int[1];
+	//int* bornNo = new int[1];
 
-	surviveNo[0] = 2;
-	surviveNo[1] = 3;
-	surviveNo[2] = 5;
-	surviveNo[3] = 6;
-	surviveNo[4] = 7;
-	surviveNo[5] = 8;
+	//surviveNo[0] = 2;
+	//surviveNo[1] = 3;
+	//surviveNo[2] = 5;
+	//surviveNo[3] = 6;
+	//surviveNo[4] = 7;
+	//surviveNo[5] = 8;
 
-	bornNo[0] = 3;
-	bornNo[1] = 4;
-	bornNo[2] = 6;
-	bornNo[3] = 8;
+	//bornNo[0] = 3;
+	//bornNo[1] = 4;
+	//bornNo[2] = 6;
+	//bornNo[3] = 8;
 
-	outer->setSurviveNo(surviveNo,0);
-	outer->setBornNo(bornNo,1);
-	outer->setStates(2);
-	outer->neighbourhoodType = outer->MOORE;
+	QList<int>* survNums = parser.ruleData.at(0);
+	QList<int>* bornNums = parser.ruleData.at(1);
+	QList<int>* states = parser.ruleData.at(2);
+
+	int survSize = (*survNums).size();
+	int* surviveNo = new int[survSize];
+	int count = 0;
+	//Pull this out into a seperate method
+	foreach(int i, *survNums) {
+		surviveNo[count] = i;
+		++count;
+	}
+	
+	int bornSize = (*bornNums).size();
+	int* bornNo = new int[bornSize];
+	count = 0;
+	//Pull this out into a seperate method
+	foreach(int i, *bornNums) {
+		bornNo[count] = i;
+		++count;
+	}
+
+	int state = (*states).at(0);
+	//surviveNo[0] = 2;
+	//surviveNo[1] = 3;
+	//bornNo[0] = 3;
+
+	gen->setSurviveNo(surviveNo,survSize);
+	gen->setBornNo(bornNo,bornSize);
+	gen->setStates(25);
+	gen->neighbourhoodType = outer->MOORE;
 
 
-	gen->setSurviveNo(surviveNo,6);
-	gen->setBornNo(bornNo,4);
-	gen->setStates(9);
-	gen->neighbourhoodType = gen->MOORE;
-
+	//gen->setSurviveNo(surviveNo,6);
+	//gen->setBornNo(bornNo,4);
+	
+	
 	int x = gen->noBits;
 
 	int one = 1;
@@ -116,4 +171,9 @@ Abstract2DCA* CAController::getCAClass() {
 	int y = one & fif;
 
 	return gen;
+}
+
+void CAController::createCAFromMCLFormat(QStringList& lines) {
+	CA = parser.parseContent(lines);
+	m_view->updateView(CA);
 }

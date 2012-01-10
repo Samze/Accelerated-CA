@@ -5,27 +5,6 @@ WinDisplay::WinDisplay(QWidget *parent, Qt::WFlags flags)
 {
 	ui.setupUi(this);
 	setController(CAController::getInstance());
-	//HINSTANCE hinstLib; 
- //   MYPROC ProcAdd; 
- //   BOOL fFreeResult, fRunTimeLinkSuccess = FALSE; 
-
-	//hinstLib = LoadLibrary(TEXT("CellularAutomataCudaLib.dll")); 
-
-	//if (hinstLib != NULL) 
- //   { 
- //       ProcAdd = (MYPROC) GetProcAddress(hinstLib, "myPuts"); 
- //
- //       // If the function address is valid, call the function.
- //
- //       if (NULL != ProcAdd) 
- //       {
- //           fRunTimeLinkSuccess = TRUE;
- //           (ProcAdd) (L"Message sent to the DLL function\n"); 
- //       }
- //       // Free the DLL module.
- //
- //       fFreeResult = FreeLibrary(hinstLib); 
- //   } 
 }
 
 WinDisplay::~WinDisplay()
@@ -47,6 +26,38 @@ void WinDisplay::setController(CAController &controller) {
 	connect(ui.btnStop,SIGNAL(clicked()),&controller,SLOT(stop()));
 	connect(ui.btnStep,SIGNAL(clicked()),&controller,SLOT(step()));
 	
-	connect(ui.btnStep,SIGNAL(clicked()),ui.glWidget,SLOT());
-	
+	connect(ui.btnRestart,SIGNAL(clicked()),&controller,SLOT(restart()));	
+
+	connect(this,SIGNAL(setCAFromMCLFormat(QStringList&)),&controller,SLOT(createCAFromMCLFormat(QStringList&)));
+}
+
+void WinDisplay::on_btnLoadFile_clicked() {
+	 QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                 "/home",
+                                                 tr("MCell documents (*.mcl)"));
+
+	 if (!fileName.isNull()) {
+		LoadFile(fileName);
+	 }
+}
+
+void  WinDisplay::LoadFile(const QString &fileName) {
+
+	QFile file(fileName);
+
+	 if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::warning(this,"Error opening file","File could not be opened.",QMessageBox::Close);
+        return;
+    }
+	 
+	 QTextStream inStream(&file);
+
+	 while(!inStream.atEnd()) {
+		 fileContents.append(inStream.readLine());
+	 }
+
+	 emit setCAFromMCLFormat(fileContents);
+
+	 file.close();
+
 }
