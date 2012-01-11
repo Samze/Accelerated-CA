@@ -42,6 +42,7 @@ void WinDisplay::on_btnLoadFile_clicked() {
 }
 
 void  WinDisplay::LoadFile(const QString &fileName) {
+	fileContents.clear();
 
 	QFile file(fileName);
 

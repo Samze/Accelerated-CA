@@ -21,18 +21,22 @@ public:
 public:
 	CellularAutomata* parseContent(QStringList& list);
 	QList<QList<int>*> ruleData;
+	unsigned int numStates;
 
 private:
 	QString getTag(const QString& line);
 	QString getData(const QString& line, const QString& tag);
 
 	QMap<QString,QString> tagDataMap;
+
 	
 	unsigned int DIM;
 
 	int parseBoardSize(const QString& data);
 	void parseRules(const QString& data);
 	unsigned int* parseLattice(const QString& data);
+	unsigned int getNumericalForLeter(const char);
+	unsigned int getNumberOfStates(QList<int>*);
 };
 
 #endif // LEXICONPARSER_H

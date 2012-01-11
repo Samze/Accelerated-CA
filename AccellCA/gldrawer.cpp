@@ -34,14 +34,6 @@ void GLDrawer::paintGL(){
 		for(int j = 0; j < CA->getDIM(); ++j) {
 			if (CA->getGrid()[i * CA->getDIM() + j] >= 1) {
 
-				/*int fif = 15;
-
-				int res = CA->getGrid()[i * CA->getDIM() + j] & 0xF;
-
-				int res2 = CA->getGrid()[i * CA->getDIM() + j] & 1;*/
-
-				unsigned int myint = CA->getGrid()[i * CA->getDIM() + j];
-				
 				//draw!
 				drawCell(i,j,cellSpace,CA->getGrid()[i * CA->getDIM() + j]);
 			}
@@ -59,21 +51,33 @@ void GLDrawer::paintGL(){
 
 void GLDrawer::drawCell(int x, int y, float cellSpace, int state) {
 
+	float r = 0;
+	float g = 0;
+	float b = 0;
+
+	int states = CA->getCARule()->getNoStates();
+
+	float colourValue = 1 - ((float)state / states);
+	r = colourValue;
+
 	
-	int r = 0;
-	int g = 0;
-	int b = 0;
+	//float third = (float)states / 3;
 
-	int DIM = CA->getDIM();
-	int third = DIM * DIM / 3;
+	////float r = state < third ? state/third : 0;
+	////float g = state < third && state < third * 2 ? state/third * 2: 0;
+	////float b = state < third * 3? state/third * 3: 0;
 
-	//float r = state < third ? state/third : 0;
-	//float g = state < third && state < third * 2 ? state/third * 2: 0;
-	//float b = state < third * 3? state/third * 3: 0;
+	//int stateRange = (state / third);
 
-	if(state == 1) r = 1;
-	if(state == 2) g = 1;
-	if(state >= 3) b = 1;
+	//int val = state - (stateRange * third);
+
+	//float colourValue = 1 - ((float)val / third);
+	//
+	//if(stateRange == 0) r = colourValue;
+	//if(stateRange == 1) g = colourValue;
+	//if(stateRange >= 2) b = colourValue;
+
+
 
 	glColor3f(r,g,b);
 

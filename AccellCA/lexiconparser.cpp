@@ -8,7 +8,10 @@ LexiconParser::LexiconParser(QObject *parent)
 
 LexiconParser::~LexiconParser()
 {
-
+	foreach(QList<int>* list, ruleData) {
+		delete list;
+		list = NULL;
+	}
 }
 
 
@@ -30,9 +33,18 @@ CellularAutomata* LexiconParser::parseContent(QStringList& lines)
 		}
 	}
 
+
 	DIM =  parseBoardSize(tagDataMap.value("#BOARD"));
 	parseRules(tagDataMap.value("#RULE"));
+
+	//For now we will assume the last rule entry is the state.
+	numStates = getNumberOfStates(ruleData.at(ruleData.size() - 1));
 	
+	if (numStates == -1) {
+		qWarning("Error parsing number of states, assuming 2");
+		numStates = 2;
+	}
+
 	unsigned int *pFlatGrid = parseLattice(tagDataMap.value("#L"));
 	
 	CellularAutomata* CA = new CellularAutomata_GPGPU(pFlatGrid,DIM);
@@ -118,9 +130,9 @@ unsigned int* LexiconParser::parseLattice(const QString& data) {
 	//TODO add different states.
 	//TODO center the grid..
 	//set inital values
-	int i = 50;
+	int i = 20;
 	int initI = i;
-	int j = 50;
+	int j = 20;
 	int initJ = j;
 
 	QString numBuilder;
@@ -135,14 +147,11 @@ unsigned int* LexiconParser::parseLattice(const QString& data) {
 
 		int val = c.toUInt(&ok,10);
 
-		if (val == 5) {
-			qDebug("");
-		}
 		//if we were a number...
 		if (ok) {
 			numBuilder.append(QString("%1").arg(val));
 		}
-		else if(c != "$") {
+		else {
 
 			int numTimes = 1;
 			if (numBuilder.size() > 0) {
@@ -153,25 +162,66 @@ unsigned int* LexiconParser::parseLattice(const QString& data) {
 					numTimes = concatNum;
 				}	
 			}
+			
+			//Are we moving rows or columns?
+			//Get move length
+			int length;
+			int l;
+			if (c == "$") {
+				length =  j + numTimes;
+				l = j;
+			}
+			else {
+				length =  i + numTimes;
+				 l = i;
+			}
 
-
-			int length = i + numTimes;
-			for (i; i < length; ++i) {
-
-				if(c != ".") {
-					pFlatGrid[i * DIM + j] = 1;
+			
+			for (l; l < length; ++l) {
+				if(c != "." && c != "$") {
+					unsigned int temp = getNumericalForLeter(c.at(0).toAscii());
+					pFlatGrid[l * DIM + j] = temp;
 				}
-				
 				//qDebug("Adding %c to %d - %d", c.at(0).toAscii(), i, j);
 			}
-			numBuilder = "";
-
-		}
-		else if(c == "$") {
-			++j;
-			i = initI;
+			
+			//Add our temp counter back to our i/k
+			if (c == "$") {
+				j += numTimes;
+				i = initI;
+			}
+			else {
+				i += numTimes;
+			}
 			numBuilder = "";
 		}
 	}
 	return pFlatGrid;
+}
+
+unsigned int LexiconParser::getNumericalForLeter(const char c) {
+
+	//64 is the ACSII number for A - 1, must be caps
+	unsigned int t = (int)c - 64;
+	return t;
+}
+
+unsigned int LexiconParser::getNumberOfStates(QList<int>* stateAsIntList) {
+
+	QString builtState;
+
+	for(int i = 0; i < stateAsIntList->size(); i++) {	
+		int digit = stateAsIntList->at(i);
+		builtState.append(QString("%1").arg(digit));
+	}
+
+	bool ok;
+
+	int val = builtState.toUInt(&ok,10);
+
+	//if we were a number...
+	if (ok) {
+		return val;
+	}
+	return -1;
 }

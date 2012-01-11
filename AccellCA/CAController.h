@@ -32,6 +32,7 @@ public: //singleton pattern
 public:
 	void setView(ICAView *view);
 	CellularAutomata *CA;
+	LexiconParser* parser;
 
 
 private: 
@@ -40,7 +41,7 @@ private:
 	~CAController();
 	void operator=(CAController const&); //do not implement
 	Abstract2DCA* getCAClass();
-	LexiconParser parser;
+	void resetForNewLoad();
 
 	State state;
 		int timerTick; //in Milliseconds
@@ -48,8 +49,8 @@ private:
 		int initSeed; //Random "0 to initseed" chance of each cell being live to start with, lower is a higher chance.
 	
 private:
-	ICAView *m_view;
-	QTimer *timer;
+	ICAView *m_view; //Weak assosiation, do not release.
+	QTimer timer;
 
 private slots:
 	void start();
@@ -58,6 +59,7 @@ private slots:
 	void restart();
 	void tick();
 	void createCAFromMCLFormat(QStringList& lines);
+	void setRulesToCA();
 };
 
 #endif // CACONTROLLER_H
