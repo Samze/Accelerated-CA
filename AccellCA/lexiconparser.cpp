@@ -102,7 +102,6 @@ void LexiconParser::parseRules(const QString& data) {
 	QStringList list = data.split("/");
 
 	foreach(QString item, list) {
-		if (!item.isEmpty()) {
 			QList<int>* intList = new QList<int>;
 
 			for(unsigned int i =0; i < item.size();i++) {
@@ -113,12 +112,10 @@ void LexiconParser::parseRules(const QString& data) {
 				}
 			}
 			ruleData.append(intList);
-		}
 	}
 }
 
 unsigned int* LexiconParser::parseLattice(const QString& data) {
-
 	unsigned int* pFlatGrid = new unsigned int[DIM * DIM];
 	
 
@@ -130,9 +127,11 @@ unsigned int* LexiconParser::parseLattice(const QString& data) {
 	//TODO add different states.
 	//TODO center the grid..
 	//set inital values
-	int i = 20;
+	int i = 0;
 	int initI = i;
-	int j = 20;
+	int highestI = 0;
+
+	int j = 0;
 	int initJ = j;
 
 	QString numBuilder;
@@ -188,6 +187,8 @@ unsigned int* LexiconParser::parseLattice(const QString& data) {
 			//Add our temp counter back to our i/k
 			if (c == "$") {
 				j += numTimes;
+
+				highestI = i > highestI? i: highestI;
 				i = initI;
 			}
 			else {
@@ -196,6 +197,47 @@ unsigned int* LexiconParser::parseLattice(const QString& data) {
 			numBuilder = "";
 		}
 	}
+	unsigned int* centeredLattice = centerLattice(pFlatGrid,highestI,j);
+
+	delete[]pFlatGrid;
+
+	return centeredLattice;
+}
+
+
+unsigned int* LexiconParser::centerLattice(unsigned int* lattice, int i, int j){
+
+	unsigned int* pFlatGrid = new unsigned int[DIM * DIM];
+	//Zero everything...for performance could use a ternary operator below instead..
+	for(unsigned int k = 0; k < DIM * DIM; k++) {
+		pFlatGrid[k] = 0;
+	}
+
+
+	int x = (DIM / 2) - (i/2);
+	int y = (DIM / 2) - (j/2);
+
+	//We add 1 to account for 0 being a valid row/column
+	int xLimit = x + i + 1;
+	int yLimit = y + j + 1;
+	
+	int iterI = 0;
+	int iterJ = 0;
+	
+	for(x; x < xLimit; x++) {
+		iterJ = 0;
+		for(int iterY = y; iterY < yLimit; iterY++) {
+
+			int latticeVal = lattice[iterI * DIM + iterJ];
+
+			if (latticeVal > 0) {
+				pFlatGrid[x * DIM + iterY] = latticeVal;
+			}
+			iterJ++;
+		}
+		iterI++;
+	}
+
 	return pFlatGrid;
 }
 
@@ -225,3 +267,4 @@ unsigned int LexiconParser::getNumberOfStates(QList<int>* stateAsIntList) {
 	}
 	return -1;
 }
+

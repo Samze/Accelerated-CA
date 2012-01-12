@@ -34,6 +34,7 @@ class WinDisplay : public QMainWindow, public ICAView
 
 	private slots:
 		void on_btnLoadFile_clicked();
+		void on_btnRestart_clicked();
 
 	signals:
 		void setCAFromMCLFormat(QStringList&);

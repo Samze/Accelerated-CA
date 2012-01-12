@@ -60,10 +60,8 @@ void CAController::restart() {
 		stop();	
 	}
 	
-	//CA = new CellularAutomata_GPGPU(cellularDim,initSeed);
 	m_view->updateView(CA);
 	state = IDLE;
-	delete parser;
 }
 
 
@@ -73,8 +71,8 @@ void CAController::tick(){
 	//TODO this should be drawing as the graphics card
 	//is calculating new values...This would require doing an expensive
 	//memory copy though...probably worth it.
-	m_view->updateView(CA);
 	float timeTaken = CA->nextTimeStep();
+	m_view->updateView(CA);
 
 	qDebug("Time taken:%3.1f ms\n",timeTaken);
 

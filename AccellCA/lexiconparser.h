@@ -35,6 +35,7 @@ private:
 	int parseBoardSize(const QString& data);
 	void parseRules(const QString& data);
 	unsigned int* parseLattice(const QString& data);
+	unsigned int* centerLattice(unsigned int* lattice, int i, int j);
 	unsigned int getNumericalForLeter(const char);
 	unsigned int getNumberOfStates(QList<int>*);
 };

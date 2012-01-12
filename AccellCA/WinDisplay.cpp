@@ -27,6 +27,7 @@ void WinDisplay::setController(CAController &controller) {
 	connect(ui.btnStep,SIGNAL(clicked()),&controller,SLOT(step()));
 	
 	connect(ui.btnRestart,SIGNAL(clicked()),&controller,SLOT(restart()));	
+	connect(ui.btnLoadFile,SIGNAL(clicked()),&controller,SLOT(stop()));
 
 	connect(this,SIGNAL(setCAFromMCLFormat(QStringList&)),&controller,SLOT(createCAFromMCLFormat(QStringList&)));
 }
@@ -60,5 +61,14 @@ void  WinDisplay::LoadFile(const QString &fileName) {
 	 emit setCAFromMCLFormat(fileContents);
 
 	 file.close();
+
+}
+
+
+void WinDisplay::on_btnRestart_clicked() {
+	
+	if (!fileContents.isEmpty()) {
+		emit setCAFromMCLFormat(fileContents);
+	}
 
 }
