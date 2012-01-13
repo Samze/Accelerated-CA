@@ -28,7 +28,7 @@ void GLDrawer::paintGL(){
 
 	if(CA != NULL) {
 	////this should not be passed
-	unsigned dim = CA->getDIM() * CA->getDIM();
+	unsigned int dim = CA->getDIM() * CA->getDIM();
 
 	float cellSpace = (float) width() / dim;
 
@@ -36,20 +36,20 @@ void GLDrawer::paintGL(){
 
 	//unsigned int* grid = new unsigned int[CA->getDIM() * CA->getDIM() * CA->getDIM()];
 	//
-	//int count = 0;
+	//int count = 1;
 	//for(int i = 0; i < CA->getDIM(); i++) {
 	//	for(int j = 0; j < CA->getDIM(); j++) {		
 	//		for(int k = 0; k < CA->getDIM(); k++) {
-	//			grid[k * dim + i * CA->getDIM() + j] = 1;
+	//			grid[k * dim + i * CA->getDIM() + j] = count;
 	//			qDebug("%d",count);
 	//			count++;
 	//		}
 	//	}
 	//}
-	
+
 	for(int i = 0; i < dim; ++i) {
 		for(int j = 0; j < CA->getDIM(); ++j) {
-				if (grid[i * CA->getDIM() + j] == 1) {
+				if (grid[i * CA->getDIM() + j] > 0) {
 					//draw!
 					drawCell(i,j,cellSpace,grid[i * CA->getDIM() + j]);
 				}
@@ -71,27 +71,28 @@ void GLDrawer::drawCell(int x, int y, float cellSpace, int state) {
 	float g = 0;
 	float b = 0;
 
-	int states = CA->getCARule()->getNoStates();
+	/*int states = CA->getCARule()->getNoStates();*/
+	int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
 
-	float colourValue = 1 - ((float)state / states);
-	r = colourValue;
+	//float colourValue = 1 - ((float)state / states);
+	//r = colourValue;
 
 	
-	//float third = (float)states / 3;
+	float third = (float)states / 3;
 
 	////float r = state < third ? state/third : 0;
 	////float g = state < third && state < third * 2 ? state/third * 2: 0;
 	////float b = state < third * 3? state/third * 3: 0;
 
-	//int stateRange = (state / third);
+	int stateRange = (state / third);
 
-	//int val = state - (stateRange * third);
+	int val = state - (stateRange * third);
 
-	//float colourValue = 1 - ((float)val / third);
-	//
-	//if(stateRange == 0) r = colourValue;
-	//if(stateRange == 1) g = colourValue;
-	//if(stateRange >= 2) b = colourValue;
+	float colourValue = 1 - ((float)val / third);
+	
+	if(stateRange == 0) r = colourValue;
+	if(stateRange == 1) g = colourValue;
+	if(stateRange >= 2) b = colourValue;
 
 
 

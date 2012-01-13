@@ -26,15 +26,17 @@ void CAController::setView(ICAView *view) {
 
 void CAController::start() {
 
+	//Abstract3DCA* gen3d = new Generations3D();
+	
 	Abstract3DCA* gen3d = new Generations3D();
 	
 	int* survNo = new int[1];
 	int* bornNo = new int[1];
 
-	survNo[0] = 25;
+	survNo[0] = 26;
 	//survNo[1] = 0;
 
-	//bornNo[0] = 99;
+	bornNo[0] = 0;
 	//bornNo[1] = 1;
 	//bornNo[2] = 2;
 	//bornNo[3] = 3;
@@ -48,10 +50,9 @@ void CAController::start() {
 	gen3d->setBornNo(bornNo,1);
 	gen3d->setStates(2);
 	gen3d->neighbourhoodType = gen3d->THREEDMOORE;
-
-	CA = new CellularAutomata_GPGPU(4,5);
+	CA = new CellularAutomata_GPGPU(100,5);
 	CA->setCARule(gen3d);
-	CA->generate3DGrid(4,5);
+	CA->generate3DGrid(100,5);
 
 	if (CA == NULL) {
 		qWarning("Enter CA before starting");
@@ -80,16 +81,20 @@ void CAController::stop() {
 void CAController::step() {
 	if(state == ACTIVE) {
 		stop();
-		tick();
 	}
-	if(state == STOPPED) {
-		tick();
-	}
-	else {
-		start();
-		stop();
-	}
-	//tick
+	tick();
+
+		//for (int i = 0; i < CA->getDIM(); ++i) {
+		//for (int j = 0; j < CA->getDIM(); ++j) {
+		//	for (int k = 0; k < CA->getDIM(); ++k) {
+		//		if(CA->getGrid()[(k * CA->getDIM() * CA->getDIM()) + (i * CA->getDIM()) + j] == 1) {
+		//		//if(CA->getGrid()[(i * CA->getDIM()) + j] == 1) {
+		//			qDebug("x = %d, y = %d, z = %d",i,j,k);
+		//		}
+		//	}
+		//}
+	
+	qDebug("Done");
 }
 
 void CAController::restart() {
