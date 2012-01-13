@@ -26,6 +26,37 @@ void CAController::setView(ICAView *view) {
 
 void CAController::start() {
 
+	Abstract3DCA* gen3d = new Generations3D();
+	
+	int* survNo = new int[1];
+	int* bornNo = new int[1];
+
+	survNo[0] = 25;
+	//survNo[1] = 0;
+
+	//bornNo[0] = 99;
+	//bornNo[1] = 1;
+	//bornNo[2] = 2;
+	//bornNo[3] = 3;
+	//bornNo[4] = 4;
+	//bornNo[5] = 5;
+	//bornNo[6] = 6;
+	//bornNo[7] = 7;
+	//bornNo[8] = 8;
+
+	gen3d->setSurviveNo(survNo,1);
+	gen3d->setBornNo(bornNo,1);
+	gen3d->setStates(2);
+	gen3d->neighbourhoodType = gen3d->THREEDMOORE;
+
+	CA = new CellularAutomata_GPGPU(4,5);
+	CA->setCARule(gen3d);
+	CA->generate3DGrid(4,5);
+
+	if (CA == NULL) {
+		qWarning("Enter CA before starting");
+		return;
+	}
 	if (state == IDLE) {
 		//Create random CA, lower range is more concentrated
 		//CA = new CellularAutomata_GPGPU(cellularDim,initSeed);
@@ -49,8 +80,16 @@ void CAController::stop() {
 void CAController::step() {
 	if(state == ACTIVE) {
 		stop();
+		tick();
 	}
-	tick();
+	if(state == STOPPED) {
+		tick();
+	}
+	else {
+		start();
+		stop();
+	}
+	//tick
 }
 
 void CAController::restart() {

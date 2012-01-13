@@ -24,7 +24,7 @@ void WinDisplay::setController(CAController &controller) {
 
 	connect(ui.btnStart,SIGNAL(clicked()),&controller,SLOT(start()));
 	connect(ui.btnStop,SIGNAL(clicked()),&controller,SLOT(stop()));
-	connect(ui.btnStep,SIGNAL(clicked()),&controller,SLOT(step()));
+	connect(ui.btnStep,SIGNAL(pressed()),&controller,SLOT(step()));
 	
 	connect(ui.btnRestart,SIGNAL(clicked()),&controller,SLOT(restart()));	
 	connect(ui.btnLoadFile,SIGNAL(clicked()),&controller,SLOT(stop()));

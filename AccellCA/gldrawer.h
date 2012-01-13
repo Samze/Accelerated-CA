@@ -44,6 +44,7 @@ protected:
 	void resizeGL(int w, int h);
 
 	void drawCell(int x, int y, float cellSpace,int);
+	void draw3DCell(int x, int y,int z, float cellSpace,int);
 
 	//events
     void mousePressEvent(QMouseEvent *event);

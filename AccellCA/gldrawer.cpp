@@ -28,17 +28,33 @@ void GLDrawer::paintGL(){
 
 	if(CA != NULL) {
 	////this should not be passed
-	float cellSpace = (float) width() / CA->getDIM();
-	
-	for(int i = 0; i < CA->getDIM(); ++i) {
-		for(int j = 0; j < CA->getDIM(); ++j) {
-			if (CA->getGrid()[i * CA->getDIM() + j] >= 1) {
+	unsigned dim = CA->getDIM() * CA->getDIM();
 
-				//draw!
-				drawCell(i,j,cellSpace,CA->getGrid()[i * CA->getDIM() + j]);
+	float cellSpace = (float) width() / dim;
+
+	unsigned int* grid = CA->getGrid();
+
+	//unsigned int* grid = new unsigned int[CA->getDIM() * CA->getDIM() * CA->getDIM()];
+	//
+	//int count = 0;
+	//for(int i = 0; i < CA->getDIM(); i++) {
+	//	for(int j = 0; j < CA->getDIM(); j++) {		
+	//		for(int k = 0; k < CA->getDIM(); k++) {
+	//			grid[k * dim + i * CA->getDIM() + j] = 1;
+	//			qDebug("%d",count);
+	//			count++;
+	//		}
+	//	}
+	//}
+	
+	for(int i = 0; i < dim; ++i) {
+		for(int j = 0; j < CA->getDIM(); ++j) {
+				if (grid[i * CA->getDIM() + j] == 1) {
+					//draw!
+					drawCell(i,j,cellSpace,grid[i * CA->getDIM() + j]);
+				}
 			}
 		}
-	}
 	}
 	//glTranslatef(1.0f,0.0f,0.0f);
 
@@ -84,7 +100,52 @@ void GLDrawer::drawCell(int x, int y, float cellSpace, int state) {
 
 	glLoadIdentity();
 	glTranslatef(x* cellSpace,y * cellSpace,0.0f);
-	glScalef(cellSpace , cellSpace ,0.0f); //minus an ammount here to get a "grid" look if desired
+	glScalef(cellSpace - 1, cellSpace - 1, 0.0f); //minus an ammount here to get a "grid" look if desired
+	//glScalef(9.0, 9.0,0.0f);
+	glBegin(GL_QUADS);
+		glVertex2f(0,0); //top left
+		glVertex2f(1,0); //top right
+		glVertex2f(1,1); //bottom right
+		glVertex2f(0,1); //bottom left
+	glEnd();
+}
+
+void GLDrawer::draw3DCell(int x, int y, int z,float cellSpace, int state) {
+
+	float r = 0;
+	float g = 0;
+	float b = 0;
+
+	int states = CA->getCARule()->getNoStates();
+
+	float colourValue = 1 - ((float)state / states);
+	r = colourValue;
+
+	
+	//float third = (float)states / 3;
+
+	////float r = state < third ? state/third : 0;
+	////float g = state < third && state < third * 2 ? state/third * 2: 0;
+	////float b = state < third * 3? state/third * 3: 0;
+
+	//int stateRange = (state / third);
+
+	//int val = state - (stateRange * third);
+
+	//float colourValue = 1 - ((float)val / third);
+	//
+	//if(stateRange == 0) r = colourValue;
+	//if(stateRange == 1) g = colourValue;
+	//if(stateRange >= 2) b = colourValue;
+
+
+
+	glColor3f(r,g,b);
+
+
+	glLoadIdentity();
+	glTranslatef(x* cellSpace,y * cellSpace,0.0f);
+	glScalef(cellSpace, cellSpace,0.0f); //minus an ammount here to get a "grid" look if desired
 	//glScalef(9.0, 9.0,0.0f);
 	glBegin(GL_QUADS);
 		glVertex2f(0,0); //top left
