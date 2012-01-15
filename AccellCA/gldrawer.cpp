@@ -3,8 +3,10 @@
 GLDrawer::GLDrawer(QWidget *parent)
 	: QGLWidget(parent), CA(0)
 {
+	setGeometry(parent->geometry());
 	//flicker problem because of a widget attribute...this may be the soltuion.
 	setAttribute(Qt::WidgetAttribute::WA_OpaquePaintEvent );
+
 }
 
 GLDrawer::~GLDrawer()
@@ -12,7 +14,7 @@ GLDrawer::~GLDrawer()
 
 }
 
-void GLDrawer::initalizeGL() {
+void GLDrawer::initializeGL() {
     glDisable(GL_TEXTURE_2D); // no need for setting the depth up
     glDisable(GL_DEPTH_TEST);
 
@@ -24,11 +26,24 @@ void GLDrawer::initalizeGL() {
 }
 
 void GLDrawer::paintGL(){
-	glClear(GL_COLOR_BUFFER_BIT);
+	
+    glClear(GL_COLOR_BUFFER_BIT);
 
 	if(CA != NULL) {
 	////this should not be passed
-	unsigned int dim = CA->getDIM() * CA->getDIM();
+
+	bool dim2D;
+	unsigned int dim;
+
+	dim2D = CA->dimType == CellularAutomata::THREE_D ? true: false;
+
+	if (!dim2D) {
+
+		dim = CA->getDIM() * CA->getDIM();
+	}
+	else {
+		dim = CA->getDIM();
+	}
 
 	float cellSpace = (float) width() / dim;
 
@@ -47,15 +62,44 @@ void GLDrawer::paintGL(){
 	//	}
 	//}
 
-	for(int i = 0; i < dim; ++i) {
-		for(int j = 0; j < CA->getDIM(); ++j) {
-				if (grid[i * CA->getDIM() + j] > 0) {
-					//draw!
-					drawCell(i,j,cellSpace,grid[i * CA->getDIM() + j]);
+	//TODO this is bad.
+	for(int i = 0; i < CA->getDIM(); i++) {
+		for(int j = 0; j < CA->getDIM(); j++) {	
+
+			if(!dim2D) {
+				for(int k = 0; k < CA->getDIM(); k++) {
+					CellPos pos;
+					pos.x = i;
+					pos.y = j;
+					pos.z = k;
+					drawCell(pos,cellSpace,grid[k * dim + i * CA->getDIM() + j]);
 				}
+			}
+			else{
+				CellPos pos;
+					pos.x = i;
+					pos.y = j;
+					drawCell(pos,cellSpace,grid[i * CA->getDIM() + j]);
 			}
 		}
 	}
+	}
+
+}
+	//for(int i = 0; i < dim; ++i) {
+	//	for(int j = 0; j < CA->getDIM(); ++j) {
+	//			if (grid[i * CA->getDIM() + j] > 0) {
+	//				//draw!
+
+	//				CellPos pos;
+	//				pos.x = i;
+	//				pos.y = j;
+
+	//				drawCell(pos,cellSpace,grid[i * CA->getDIM() + j]);
+	//			}
+	//		}
+	//	}
+	//}
 	//glTranslatef(1.0f,0.0f,0.0f);
 
  //   glBegin(GL_POLYGON);
@@ -63,98 +107,53 @@ void GLDrawer::paintGL(){
 	//	glVertex2f(100,300);
 	//	glVertex2f(300,100);
  //   glEnd();
-}
-
-void GLDrawer::drawCell(int x, int y, float cellSpace, int state) {
-
-	float r = 0;
-	float g = 0;
-	float b = 0;
-
-	/*int states = CA->getCARule()->getNoStates();*/
-	int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
-
-	//float colourValue = 1 - ((float)state / states);
-	//r = colourValue;
-
-	
-	float third = (float)states / 3;
-
-	////float r = state < third ? state/third : 0;
-	////float g = state < third && state < third * 2 ? state/third * 2: 0;
-	////float b = state < third * 3? state/third * 3: 0;
-
-	int stateRange = (state / third);
-
-	int val = state - (stateRange * third);
-
-	float colourValue = 1 - ((float)val / third);
-	
-	if(stateRange == 0) r = colourValue;
-	if(stateRange == 1) g = colourValue;
-	if(stateRange >= 2) b = colourValue;
 
 
-
-	glColor3f(r,g,b);
-
-
-	glLoadIdentity();
-	glTranslatef(x* cellSpace,y * cellSpace,0.0f);
-	glScalef(cellSpace - 1, cellSpace - 1, 0.0f); //minus an ammount here to get a "grid" look if desired
-	//glScalef(9.0, 9.0,0.0f);
-	glBegin(GL_QUADS);
-		glVertex2f(0,0); //top left
-		glVertex2f(1,0); //top right
-		glVertex2f(1,1); //bottom right
-		glVertex2f(0,1); //bottom left
-	glEnd();
-}
-
-void GLDrawer::draw3DCell(int x, int y, int z,float cellSpace, int state) {
-
-	float r = 0;
-	float g = 0;
-	float b = 0;
-
-	int states = CA->getCARule()->getNoStates();
-
-	float colourValue = 1 - ((float)state / states);
-	r = colourValue;
-
-	
-	//float third = (float)states / 3;
-
-	////float r = state < third ? state/third : 0;
-	////float g = state < third && state < third * 2 ? state/third * 2: 0;
-	////float b = state < third * 3? state/third * 3: 0;
-
-	//int stateRange = (state / third);
-
-	//int val = state - (stateRange * third);
-
-	//float colourValue = 1 - ((float)val / third);
-	//
-	//if(stateRange == 0) r = colourValue;
-	//if(stateRange == 1) g = colourValue;
-	//if(stateRange >= 2) b = colourValue;
-
-
-
-	glColor3f(r,g,b);
-
-
-	glLoadIdentity();
-	glTranslatef(x* cellSpace,y * cellSpace,0.0f);
-	glScalef(cellSpace, cellSpace,0.0f); //minus an ammount here to get a "grid" look if desired
-	//glScalef(9.0, 9.0,0.0f);
-	glBegin(GL_QUADS);
-		glVertex2f(0,0); //top left
-		glVertex2f(1,0); //top right
-		glVertex2f(1,1); //bottom right
-		glVertex2f(0,1); //bottom left
-	glEnd();
-}
+//void GLDrawer::drawCell(int x, int y, float cellSpace, int state) {
+//
+//	float r = 0;
+//	float g = 0;
+//	float b = 0;
+//
+//	/*int states = CA->getCARule()->getNoStates();*/
+//	int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
+//
+//	//float colourValue = 1 - ((float)state / states);
+//	//r = colourValue;
+//
+//	
+//	float third = (float)states / 3;
+//
+//	////float r = state < third ? state/third : 0;
+//	////float g = state < third && state < third * 2 ? state/third * 2: 0;
+//	////float b = state < third * 3? state/third * 3: 0;
+//
+//	int stateRange = (state / third);
+//
+//	int val = state - (stateRange * third);
+//
+//	float colourValue = 1 - ((float)val / third);
+//	
+//	if(stateRange == 0) r = colourValue;
+//	if(stateRange == 1) g = colourValue;
+//	if(stateRange >= 2) b = colourValue;
+//
+//
+//
+//	glColor3f(r,g,b);
+//
+//
+//	glLoadIdentity();
+//	glTranslatef(x* cellSpace,y * cellSpace,0.0f);
+//	glScalef(cellSpace - 1, cellSpace - 1, 0.0f); //minus an ammount here to get a "grid" look if desired
+//	//glScalef(9.0, 9.0,0.0f);
+//	glBegin(GL_QUADS);
+//		glVertex2f(0,0); //top left
+//		glVertex2f(1,0); //top right
+//		glVertex2f(1,1); //bottom right
+//		glVertex2f(0,1); //bottom left
+//	glEnd();
+//}
 
 //ran on opening scene too
 void GLDrawer::resizeGL(int w, int h){

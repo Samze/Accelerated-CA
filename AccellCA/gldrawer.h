@@ -38,23 +38,28 @@ public:
 	*/
 	CellularAutomata *CA;
 
-protected:
-	void paintGL();
-	void initalizeGL();
-	void resizeGL(int w, int h);
+	struct CellPos
+    {
+        unsigned int x;
+        unsigned int y;
+        unsigned int z;
+    };
 
-	void drawCell(int x, int y, float cellSpace,int);
-	void draw3DCell(int x, int y,int z, float cellSpace,int);
+protected:
+	virtual void paintGL();
+	virtual void initializeGL();
+	virtual void resizeGL(int w, int h);
+
+	virtual void drawCell(CellPos pos, float cellSpace,int state) = 0;
+
+	//void drawCell(int x, int y, float cellSpace,int);
 
 	//events
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
 
-private:
-	GLfloat rot;
-	int cellScale;
-
+	float rot;
 };
 
 #endif // GLDRAWER_H

@@ -34,9 +34,23 @@ void CAController::start() {
 	int* bornNo = new int[1];
 
 	survNo[0] = 26;
-	//survNo[1] = 0;
+	//survNo[1] = 25;
+	//survNo[2] = 24;
+	//survNo[3] = 23;
+	//survNo[4] = 22;
+	//survNo[5] = 21;
+	//survNo[6] = 20;
+	//survNo[7] = 19;
+	//survNo[8] = 18;
+	//survNo[9] = 17;
+	//survNo[10] = 16;
+	//survNo[11] = 15;
+	//survNo[12] = 14;
+	//survNo[13] = 13;
 
 	bornNo[0] = 0;
+	//bornNo[1] = 18;
+	//bornNo[2] = 19;
 	//bornNo[1] = 1;
 	//bornNo[2] = 2;
 	//bornNo[3] = 3;
@@ -50,9 +64,9 @@ void CAController::start() {
 	gen3d->setBornNo(bornNo,1);
 	gen3d->setStates(2);
 	gen3d->neighbourhoodType = gen3d->THREEDMOORE;
-	CA = new CellularAutomata_GPGPU(100,5);
+	CA = new CellularAutomata_GPGPU(CellularAutomata::TWO_D,16,2);
 	CA->setCARule(gen3d);
-	CA->generate3DGrid(100,5);
+	CA->generate3DGrid(16,2);
 
 	if (CA == NULL) {
 		qWarning("Enter CA before starting");

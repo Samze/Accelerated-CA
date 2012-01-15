@@ -4,11 +4,16 @@ WinDisplay::WinDisplay(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
 	ui.setupUi(this);
+
+
+	drawer = new GL3DDrawer(ui.glWidget);
+
 	setController(CAController::getInstance());
 }
 
 WinDisplay::~WinDisplay()
 {
+
 }
 
 void WinDisplay::setWindowTitle1(QString &title) {
@@ -16,8 +21,8 @@ void WinDisplay::setWindowTitle1(QString &title) {
 }
 
 void WinDisplay::updateView(CellularAutomata* ca) {
-	ui.glWidget->CA  = ca;
-	ui.glWidget->updateGL();
+	drawer->CA  = ca;
+	drawer->updateGL();
 }
 
 void WinDisplay::setController(CAController &controller) {

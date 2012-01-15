@@ -47,7 +47,7 @@ CellularAutomata* LexiconParser::parseContent(QStringList& lines)
 
 	unsigned int *pFlatGrid = parseLattice(tagDataMap.value("#L"));
 	
-	CellularAutomata* CA = new CellularAutomata_GPGPU(pFlatGrid,DIM);
+	CellularAutomata* CA = new CellularAutomata_GPGPU(CellularAutomata::TWO_D,pFlatGrid,DIM);
 
 	return CA;
 }

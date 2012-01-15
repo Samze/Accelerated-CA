@@ -14,7 +14,7 @@
    <string>WinDisplay</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="GLDrawer" name="glWidget" native="true">
+   <widget class="QWidget" name="glWidget" native="true">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -93,14 +93,6 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>GLDrawer</class>
-   <extends>QWidget</extends>
-   <header>gldrawer.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="WinDisplay.qrc"/>
  </resources>

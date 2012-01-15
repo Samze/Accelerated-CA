@@ -9,6 +9,8 @@
 #include <QTextStream>
 #include <qdebug.h>
 #include <QStringList>
+#include "gl2ddrawer.h"
+#include "gl3ddrawer.h"
 
 
 //typedef int (__cdecl *MYPROC)(LPWSTR); 
@@ -28,9 +30,9 @@ class WinDisplay : public QMainWindow, public ICAView
 	private:
 		Ui::WinDisplayClass ui;
 		void LoadFile(const QString &fileName);
-		//CAController& m_controller; //this should probably be in abstract class
 
 		QStringList fileContents;
+		GLDrawer* drawer;
 
 	private slots:
 		void on_btnLoadFile_clicked();
