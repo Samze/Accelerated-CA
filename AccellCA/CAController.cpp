@@ -64,9 +64,9 @@ void CAController::start() {
 	gen3d->setBornNo(bornNo,1);
 	gen3d->setStates(2);
 	gen3d->neighbourhoodType = gen3d->THREEDMOORE;
-	CA = new CellularAutomata_GPGPU(CellularAutomata::TWO_D,16,2);
+	CA = new CellularAutomata_GPGPU(CellularAutomata::TWO_D,8,2);
 	CA->setCARule(gen3d);
-	CA->generate3DGrid(16,2);
+	CA->generate3DGrid(8,2);
 
 	if (CA == NULL) {
 		qWarning("Enter CA before starting");
@@ -94,10 +94,11 @@ void CAController::stop() {
 
 void CAController::step() {
 	if(state == ACTIVE) {
-		stop();
+		//stop();
 	}
+	float timeTaken = CA->nextTimeStep();
 	tick();
-
+	
 		//for (int i = 0; i < CA->getDIM(); ++i) {
 		//for (int j = 0; j < CA->getDIM(); ++j) {
 		//	for (int k = 0; k < CA->getDIM(); ++k) {
@@ -129,10 +130,10 @@ void CAController::tick(){
 	//TODO this should be drawing as the graphics card
 	//is calculating new values...This would require doing an expensive
 	//memory copy though...probably worth it.
-	float timeTaken = CA->nextTimeStep();
+	//float timeTaken = CA->nextTimeStep();
 	m_view->updateView(CA);
 
-	qDebug("Time taken:%3.1f ms\n",timeTaken);
+	//qDebug("Time taken:%3.1f ms\n",timeTaken);
 
 }
 

@@ -17,6 +17,7 @@ void GL3DDrawer::paintGL(){
 	glLoadIdentity();
 
 	glTranslatef(-0.5,-0.5,-20);
+	//glRotatef(30,-1.0f,0.0f,0.0f);
 	glRotatef(rot,0,1,0);
 
 	if(CA != NULL) {
@@ -41,6 +42,8 @@ void GL3DDrawer::paintGL(){
 						pos.z = k;
 						drawCell(pos,cellSpace,grid[k * dim + i * CA->getDIM() + j]);
 					}
+					
+					//qDebug("x = %d, y = %d, z = %d, state = %d", i,j,k, grid[k * dim + i * CA->getDIM() + j]);
 					count++;
 				}
 			}
@@ -48,7 +51,7 @@ void GL3DDrawer::paintGL(){
 	qDebug("%d",count);
 	}
 
-	rot += 0.1;
+	rot += 0.3;
 }
 
 void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
@@ -58,7 +61,6 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	float y = pos.y;
 	float z = pos.z;
 
-	//qDebug("x = %d, y = %d, z = %d, state = %d", pos.x,pos.y,pos.z, state);
 
 	float r = 0;
 	float g = 0;
@@ -100,7 +102,7 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	//glTranslatef(x/CA->getDIM(),y/CA->getDIM(), z/CA->getDIM());
 	//glTranslatef((float)x/CA->getDIM(),(float)y/CA->getDIM(), (float)z/CA->getDIM());
 	//glScalef(1/cellSpace - 0.1, 1/cellSpace- 0.1, 1/cellSpace- 0.1); //minus an ammount here to get a "grid" look if desired
-	//glRotatef(30,1.0f,0.0f,0.0f);
+
 	//glRotatef(30,0.0f,1.0f,0.0f);
 
 	//glTranslatef(0,0, -35.5);
