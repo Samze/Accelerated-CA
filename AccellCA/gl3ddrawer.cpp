@@ -3,11 +3,16 @@
 GL3DDrawer::GL3DDrawer(QWidget *parent) : GLDrawer(parent)
 {
 	rot = 0;
+	//VBO = new QGLBuffer(QGLBuffer::VertexBuffer);
+	//IBO = new QGLBuffer(QGLBuffer::IndexBuffer);
+
 }
 
 GL3DDrawer::~GL3DDrawer()
 {
-
+	
+	/*VBO->release(QGLBuffer::VertexBuffer);
+	IBO->release(QGLBuffer::IndexBuffer);*/
 }
 
 void GL3DDrawer::paintGL(){
@@ -17,8 +22,11 @@ void GL3DDrawer::paintGL(){
 	glLoadIdentity();
 
 	glTranslatef(-0.5,-0.5,-20);
-	//glRotatef(30,-1.0f,0.0f,0.0f);
+	glRotatef(30,-1.0f,0.0f,0.0f);
 	glRotatef(rot,0,1,0);
+
+	
+	
 
 	if(CA != NULL) {
 	////this should not be passed
@@ -29,90 +37,104 @@ void GL3DDrawer::paintGL(){
 	float cellSpace = ((float) width() / CA->getDIM()) / width() ;
 
 	unsigned int* grid = CA->getGrid();
+	
+	//todo fix this
+	Generations3D* v3 = dynamic_cast<Generations3D*>(CA->getCARule());
 
 	int count = 0;
 	//TODO this is bad.
 	for(int i = 0; i < CA->getDIM(); i++) {
 		for(int j = 0; j < CA->getDIM(); j++) {	
 				for(int k = 0; k < CA->getDIM(); k++) {
-					if (grid[k * dim + i * CA->getDIM() + j] >  0) {
-						CellPos pos;
-						pos.x = i;
-						pos.y = j;
-						pos.z = k;
-						drawCell(pos,cellSpace,grid[k * dim + i * CA->getDIM() + j]);
+					int state = grid[k * dim + i * CA->getDIM() + j];
+					unsigned int* neighbours = v3->neighbourCount;
+					if (state >  0) {
+						int neighCount = neighbours[k * dim + i * CA->getDIM() + j];
+						if (neighCount != 26) {
+							CellPos pos;
+							pos.x = i;
+							pos.y = j;
+							pos.z = k;
+							drawCell(pos,cellSpace,state);
+						}
+						else {
+							count++;
+						}
 					}
-					
 					//qDebug("x = %d, y = %d, z = %d, state = %d", i,j,k, grid[k * dim + i * CA->getDIM() + j]);
-					count++;
 				}
 			}
 		}
-	qDebug("%d",count);
+	qDebug("Number skipped = %d",count);
 	}
-
+	//qDebug("Done");
 	rot += 0.3;
+
 }
 
 void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	
+	
+	//float x = pos.x;
+	//float y = pos.y;
+	//float z = pos.z;
 
-	float x = pos.x;
-	float y = pos.y;
-	float z = pos.z;
 
-
-	float r = 0;
-	float g = 0;
-	float b = 0;
+	//float r = 0;
+	//float g = 0;
+	//float b = 0;
 
 	/*int states = CA->getCARule()->getNoStates();*/
-	int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
+	//int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
 
 	//float colourValue = 1 - ((float)state / states);
 	//r = colourValue;
 
 	
-	float third = (float)states / 3;
+//	float third = (float)states / 3;
 
 	////float r = state < third ? state/third : 0;
 	////float g = state < third && state < third * 2 ? state/third * 2: 0;
 	////float b = state < third * 3? state/third * 3: 0;
 
-	int stateRange = (state / third);
+	//int stateRange = (state / third);
 
-	int val = state - (stateRange * third);
+	//int val = state - (stateRange * third);
 
-	float colourValue = 1 - ((float)val / third);
-	
-	if(stateRange == 0) r = colourValue;
-	if(stateRange == 1) g = colourValue;
-	if(stateRange >= 2) b = colourValue;
+	//float colourValue = 1 - ((float)val / third);
+	//
+	//if(stateRange == 0) r = colourValue;
+	//if(stateRange == 1) g = colourValue;
+	//if(stateRange >= 2) b = colourValue;
 
 
 
-	glColor3f(r,g,b);
+	//glColor3f(r,g,b);
 
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadIdentity();
 	//glTranslatef(cellSpace * x,cellSpace * y, (cellSpace * z) - 5.5f);
 
 	glPushMatrix();
-	glTranslatef(x * cellSpace,y * cellSpace, z * cellSpace);
+	glTranslatef(pos.x * cellSpace,pos.y * cellSpace, pos.z * cellSpace);
+	
 	//glTranslatef(x/CA->getDIM(),y/CA->getDIM(), z/CA->getDIM());
 	//glTranslatef((float)x/CA->getDIM(),(float)y/CA->getDIM(), (float)z/CA->getDIM());
 	//glScalef(1/cellSpace - 0.1, 1/cellSpace- 0.1, 1/cellSpace- 0.1); //minus an ammount here to get a "grid" look if desired
 
 	//glRotatef(30,0.0f,1.0f,0.0f);
-
 	//glTranslatef(0,0, -35.5);
 	//glRotatef(rot,0.0f,1.0f,0.0f);
 	//glRotatef(rot,1.0f,1.0f,1.0f);
 
 	float scaledSpace = cellSpace - (cellSpace * 0.1);
 	glScalef(scaledSpace,scaledSpace, scaledSpace);
+	
 	//glScalef(cellSpace- 0.05,cellSpace- 0.05,cellSpace - 0.05);
-	draw3DCell();
+	//draw3DCell();
+	//draw3DElements();
+	//drawVBO();
+	glCallList(id);
 
 	glPopMatrix();
 }
@@ -131,6 +153,12 @@ void GL3DDrawer::initializeGL() {
 	glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 	glFrustum(-0.5,0.5,-0.5,0.5,5,50);
+
+	//id = createCombinedDisplayList();
+	id = createDisplayList();
+	//createVBO();	
+	//bool resultVBO = VBO->bind();
+	//bool resultIBO = IBO->bind();
 }
 
 
@@ -148,6 +176,32 @@ void GL3DDrawer::resizeGL(int w, int h){
     glLoadIdentity();
 }
 
+void GL3DDrawer::draw3DElements() {
+
+	GLubyte indices[] =  {0,1,2,3,   // 24 of indices
+                0,3,4,5,
+                0,5,6,1,
+				1,6,7,2,
+                7,4,3,2,
+                4,7,6,5};
+
+	GLfloat vertices[] =  {0.5f, 0.5f, -0.5f,
+						-0.5f, 0.5f, -0.5f,
+						-0.5f,-0.5f,-0.5f,
+						0.5f,-0.5f,-0.5f,
+						0.5f,-0.5f, 0.5f,
+						0.5f, 0.5f, 0.5f,
+						-0.5f, 0.5f, 0.5f,
+						-0.5f,-0.5f, 0.5f};
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3,GL_FLOAT,0,vertices);
+
+	glDrawElements(GL_QUADS,24,GL_UNSIGNED_BYTE,indices);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+}
 void GL3DDrawer::draw3DCell() {
     glBegin(GL_QUADS);
     glNormal3f( 0.0f, 0.0f, 1.0f);
@@ -176,4 +230,114 @@ void GL3DDrawer::draw3DCell() {
     
     glEnd();
 
+}
+
+void GL3DDrawer::drawVBO() {
+	
+	//VBO->setUsagePattern(QGLBuffer::StaticDraw);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3,GL_FLOAT,0,0);
+
+	glDrawElements(GL_QUADS,24, GL_UNSIGNED_BYTE,0);
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void GL3DDrawer::createVBO() {
+	GLubyte indices[] =  {0,1,2,3,   // 24 of indices
+                0,3,4,5,
+                0,5,6,1,
+				1,6,7,2,
+                7,4,3,2,
+                4,7,6,5};
+
+	GLfloat vertices[] =  {0.5f, 0.5f, -0.5f,
+						-0.5f, 0.5f, -0.5f,
+						-0.5f,-0.5f,-0.5f,
+						0.5f,-0.5f,-0.5f,
+						0.5f,-0.5f, 0.5f,
+						0.5f, 0.5f, 0.5f,
+						-0.5f, 0.5f, 0.5f,
+						-0.5f,-0.5f, 0.5f};
+
+	bool resultVBO;
+	bool resultIBO;
+
+	resultVBO = VBO->create();
+	resultIBO = IBO->create();
+
+	if(!resultVBO || !resultIBO ) {
+		qWarning("GL implementation does not support buffers or there is no QGLContext");
+	}
+	
+	resultVBO = VBO->bind();
+	resultIBO = IBO->bind();
+
+	if(!resultVBO || !resultIBO ) {
+		qWarning("Unable to bind");
+	}
+
+	VBO->setUsagePattern(QGLBuffer::StaticDraw);
+	IBO->setUsagePattern(QGLBuffer::StaticDraw);
+
+	VBO->allocate(vertices,sizeof(GLfloat) * 24);
+	IBO->allocate(indices,sizeof(GLfloat) * 24);
+
+	qDebug("%d",VBO->bufferId());
+	qDebug("%d",IBO->bufferId());
+
+	if (VBO->size() != sizeof(GLfloat) * 24) {
+		qWarning("VBO datasizes do not match");
+	}
+
+}
+
+
+GLuint GL3DDrawer::createDisplayList() {
+
+	GLuint cubeDL;
+
+	cubeDL = glGenLists(1);
+
+	glNewList(cubeDL,GL_COMPILE);
+		draw3DCell();
+	glEndList();
+
+	return cubeDL;
+}
+
+
+GLuint GL3DDrawer::createCombinedDisplayList() {
+
+	GLuint cubeDL;
+
+	cubeDL = glGenLists(1);
+	/*
+	unsigned int* grid = CA->getGrid();
+	
+	unsigned int dim = CA->getDIM() * CA->getDIM();*/
+	float cellSpace = ((float) width() / 50) / width() ;
+
+	glNewList(cubeDL,GL_COMPILE);
+
+	for(int i = 0; i < 50; i++) {
+		for(int j = 0; j < 50; j++) {	
+				for(int k = 0; k < 50; k++) {
+			
+					glPushMatrix();
+					glTranslatef(i * cellSpace,j * cellSpace, k * cellSpace);
+	
+					float scaledSpace = cellSpace - (cellSpace * 0.1);
+					glScalef(scaledSpace,scaledSpace, scaledSpace);
+					draw3DCell();
+		
+					glPopMatrix();
+
+				}
+			}
+	}
+	glEndList();
+
+	return cubeDL;
 }

@@ -2,6 +2,7 @@
 #define GL3DDRAWER_H
 
 #include "gldrawer.h"
+#include "qglbuffer.h"
 
 class GL3DDrawer : public GLDrawer
 {
@@ -19,6 +20,15 @@ public:
 
 private:
 	void draw3DCell();
+	void draw3DElements();
+	void drawVBO();
+	void createVBO();
+	QGLBuffer* VBO; //= new QGLBuffer(QGLBuffer::VertexBuffer);
+	QGLBuffer* IBO;// = new QGLBuffer(QGLBuffer::IndexBuffer);
+
+	GLuint createDisplayList();
+	GLuint id;
+	GLuint createCombinedDisplayList();
 };
 
 #endif // GL3DDRAWER_H

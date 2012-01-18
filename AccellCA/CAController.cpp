@@ -29,11 +29,18 @@ void CAController::start() {
 	//Abstract3DCA* gen3d = new Generations3D();
 	
 	Abstract3DCA* gen3d = new Generations3D();
+
 	
-	int* survNo = new int[1];
+	int* survNo = new int[2];
 	int* bornNo = new int[1];
 
+	
 	survNo[0] = 26;
+//	survNo[1] = 4;
+
+	bornNo[0] = 0;
+
+	//survNo[0] = 26;
 	//survNo[1] = 25;
 	//survNo[2] = 24;
 	//survNo[3] = 23;
@@ -48,7 +55,7 @@ void CAController::start() {
 	//survNo[12] = 14;
 	//survNo[13] = 13;
 
-	bornNo[0] = 0;
+	//bornNo[0] = 17;
 	//bornNo[1] = 18;
 	//bornNo[2] = 19;
 	//bornNo[1] = 1;
@@ -60,13 +67,16 @@ void CAController::start() {
 	//bornNo[7] = 7;
 	//bornNo[8] = 8;
 
+	int dim = 40;
 	gen3d->setSurviveNo(survNo,1);
 	gen3d->setBornNo(bornNo,1);
 	gen3d->setStates(2);
 	gen3d->neighbourhoodType = gen3d->THREEDMOORE;
-	CA = new CellularAutomata_GPGPU(CellularAutomata::TWO_D,8,2);
+	CA = new CellularAutomata_GPGPU(CellularAutomata::TWO_D,dim,2);
 	CA->setCARule(gen3d);
-	CA->generate3DGrid(8,2);
+	CA->generate3DGrid(dim,2);
+	
+	gen3d->neighbourCount = new unsigned int[dim * dim * dim];
 
 	if (CA == NULL) {
 		qWarning("Enter CA before starting");
@@ -80,7 +90,6 @@ void CAController::start() {
 	
 	state = ACTIVE;
 	timer.start(timerTick);
-
 }
 
 void CAController::stop() {
@@ -96,8 +105,9 @@ void CAController::step() {
 	if(state == ACTIVE) {
 		//stop();
 	}
-	float timeTaken = CA->nextTimeStep();
+	
 	tick();
+	float timeTaken = CA->nextTimeStep();
 	
 		//for (int i = 0; i < CA->getDIM(); ++i) {
 		//for (int j = 0; j < CA->getDIM(); ++j) {
@@ -109,7 +119,7 @@ void CAController::step() {
 		//	}
 		//}
 	
-	qDebug("Done");
+	qDebug("%3.1f",timeTaken);
 }
 
 void CAController::restart() {
@@ -130,10 +140,10 @@ void CAController::tick(){
 	//TODO this should be drawing as the graphics card
 	//is calculating new values...This would require doing an expensive
 	//memory copy though...probably worth it.
-	//float timeTaken = CA->nextTimeStep();
+	float timeTaken = CA->nextTimeStep();
 	m_view->updateView(CA);
 
-	//qDebug("Time taken:%3.1f ms\n",timeTaken);
+	qDebug("Time taken:%3.1f ms\n",timeTaken);
 
 }
 

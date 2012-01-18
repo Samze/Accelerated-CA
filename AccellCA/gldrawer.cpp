@@ -32,18 +32,7 @@ void GLDrawer::paintGL(){
 	if(CA != NULL) {
 	////this should not be passed
 
-	bool dim2D;
-	unsigned int dim;
-
-	dim2D = CA->dimType == CellularAutomata::THREE_D ? true: false;
-
-	if (!dim2D) {
-
-		dim = CA->getDIM() * CA->getDIM();
-	}
-	else {
-		dim = CA->getDIM();
-	}
+	unsigned int dim= CA->getDIM();
 
 	float cellSpace = (float) width() / dim;
 
@@ -65,22 +54,13 @@ void GLDrawer::paintGL(){
 	//TODO this is bad.
 	for(int i = 0; i < CA->getDIM(); i++) {
 		for(int j = 0; j < CA->getDIM(); j++) {	
-
-			if(!dim2D) {
-				for(int k = 0; k < CA->getDIM(); k++) {
-					CellPos pos;
-					pos.x = i;
-					pos.y = j;
-					pos.z = k;
-					drawCell(pos,cellSpace,grid[k * dim + i * CA->getDIM() + j]);
-				}
-			}
-			else{
+			if (grid[i * CA->getDIM() + j] > 0) { 
 				CellPos pos;
 					pos.x = i;
 					pos.y = j;
 					drawCell(pos,cellSpace,grid[i * CA->getDIM() + j]);
 			}
+			
 		}
 	}
 	}

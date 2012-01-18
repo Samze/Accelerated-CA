@@ -20,11 +20,11 @@ void GL2DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	float g = 0;
 	float b = 0;
 
-	/*int states = CA->getCARule()->getNoStates();*/
-	int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
+	int states = CA->getCARule()->getNoStates();
+	//int states = CA->getDIM() * CA->getDIM();
 
-	//float colourValue = 1 - ((float)state / states);
-	//r = colourValue;
+	float colourValue = 1 - ((float)state / states);
+	r = colourValue;
 
 	
 	float third = (float)states / 3;
@@ -37,11 +37,11 @@ void GL2DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 
 	int val = state - (stateRange * third);
 
-	float colourValue = 1 - ((float)val / third);
+	//float colourValue = 1 - ((float)val / third);
 	
-	if(stateRange == 0) r = colourValue;
-	if(stateRange == 1) g = colourValue;
-	if(stateRange >= 2) b = colourValue;
+	//if(stateRange == 0) r = colourValue;
+	//if(stateRange == 1) g = colourValue;
+	//if(stateRange >= 2) b = colourValue;
 
 
 

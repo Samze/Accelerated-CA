@@ -21,8 +21,11 @@ void WinDisplay::setWindowTitle1(QString &title) {
 }
 
 void WinDisplay::updateView(CellularAutomata* ca) {
+	QTime myTimer;
+	myTimer.start();
 	drawer->CA  = ca;
 	drawer->updateGL();
+	qDebug("Render time = %d", myTimer.elapsed());
 }
 
 void WinDisplay::setController(CAController &controller) {

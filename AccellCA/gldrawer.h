@@ -3,6 +3,7 @@
 
 #include <QGLWidget>
 #include <QtGui/QMouseEvent>
+#include "qgl.h"
 #include "CellularAutomata.h"
 /**
 	This class is an implement of QTs support for openGL. It inherits from QGLWidget

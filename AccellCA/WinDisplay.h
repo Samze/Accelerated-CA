@@ -7,6 +7,7 @@
 #include "ICAView.h"
 #include <QMessageBox>
 #include <QTextStream>
+#include <QTime>
 #include <qdebug.h>
 #include <QStringList>
 #include "gl2ddrawer.h"
