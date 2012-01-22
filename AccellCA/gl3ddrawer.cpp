@@ -2,17 +2,16 @@
 
 GL3DDrawer::GL3DDrawer(QWidget *parent) : GLDrawer(parent)
 {
-	rot = 0;
-	//VBO = new QGLBuffer(QGLBuffer::VertexBuffer);
-	//IBO = new QGLBuffer(QGLBuffer::IndexBuffer);
+	VBO = new QGLBuffer(QGLBuffer::VertexBuffer);
+	IBO = new QGLBuffer(QGLBuffer::IndexBuffer);
 
 }
 
 GL3DDrawer::~GL3DDrawer()
 {
 	
-	/*VBO->release(QGLBuffer::VertexBuffer);
-	IBO->release(QGLBuffer::IndexBuffer);*/
+	VBO->release(QGLBuffer::VertexBuffer);
+	IBO->release(QGLBuffer::IndexBuffer);
 }
 
 void GL3DDrawer::paintGL(){
@@ -21,13 +20,16 @@ void GL3DDrawer::paintGL(){
 	glMatrixMode(GL_MODELVIEW);	
 	glLoadIdentity();
 
-	glTranslatef(-0.5,-0.5,-20);
-	glRotatef(30,-1.0f,0.0f,0.0f);
-	glRotatef(rot,0,1,0);
+	glTranslatef(0,0,sceneZoom);
 
+	glColor3f(0.0,1.0,0.0);
 	
-	
+	glRotatef(xRot,1,0,0);
+	glRotatef(yRot,0,1,0);	
 
+	drawWireFrameCube();	
+	//glCullFace(GL_BACK);
+	
 	if(CA != NULL) {
 	////this should not be passed
 
@@ -35,6 +37,10 @@ void GL3DDrawer::paintGL(){
 	unsigned int dim = CA->getDIM() * CA->getDIM();
 
 	float cellSpace = ((float) width() / CA->getDIM()) / width() ;
+
+	float trans = -(cellSpace * CA->getDIM()/2) + cellSpace/2;
+
+	glTranslatef(trans,trans,trans);
 
 	unsigned int* grid = CA->getGrid();
 	
@@ -68,7 +74,7 @@ void GL3DDrawer::paintGL(){
 	qDebug("Number skipped = %d",count);
 	}
 	//qDebug("Done");
-	rot += 0.3;
+	//rot += 1;
 
 }
 
@@ -80,36 +86,35 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	//float z = pos.z;
 
 
-	//float r = 0;
-	//float g = 0;
-	//float b = 0;
+	float r = 0;
+	float g = 0;
+	float b = 0;
 
-	/*int states = CA->getCARule()->getNoStates();*/
+	int states = CA->getCARule()->getNoStates();
 	//int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
 
 	//float colourValue = 1 - ((float)state / states);
 	//r = colourValue;
-
 	
-//	float third = (float)states / 3;
+	float third = (float)states / 3;
 
-	////float r = state < third ? state/third : 0;
-	////float g = state < third && state < third * 2 ? state/third * 2: 0;
-	////float b = state < third * 3? state/third * 3: 0;
+	//float r = state < third ? state/third : 0;
+	//float g = state < third && state < third * 2 ? state/third * 2: 0;
+	//float b = state < third * 3? state/third * 3: 0;
 
-	//int stateRange = (state / third);
+	int stateRange = (state / third);
 
-	//int val = state - (stateRange * third);
+	int val = state - (stateRange * third);
 
-	//float colourValue = 1 - ((float)val / third);
-	//
-	//if(stateRange == 0) r = colourValue;
-	//if(stateRange == 1) g = colourValue;
-	//if(stateRange >= 2) b = colourValue;
+	float colourValue = 1 - ((float)val / third);
+	
+	if(stateRange == 0) r = colourValue;
+	if(stateRange == 1) g = colourValue;
+	if(stateRange >= 2) b = colourValue;
 
 
-
-	//glColor3f(r,g,b);
+//	glMaterialf(r,g,b);
+	glColor3f(r,g,b);
 
 	//glMatrixMode(GL_MODELVIEW);
 	//glLoadIdentity();
@@ -135,7 +140,6 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	//draw3DElements();
 	//drawVBO();
 	glCallList(id);
-
 	glPopMatrix();
 }
 
@@ -145,9 +149,11 @@ void GL3DDrawer::initializeGL() {
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_NORMALIZE);
-   /* glEnable(GL_BLEND);
-    glEnable(GL_POLYGON_SMOOTH);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+	glEnable(GL_COLOR_MATERIAL);
+	//glEnable(GL_CULL_FACE);
+    //glEnable(GL_BLEND);
+    //glEnable(GL_POLYGON_SMOOTH);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0, 0, 0, 1);
 
 	glMatrixMode(GL_PROJECTION);
@@ -155,12 +161,13 @@ void GL3DDrawer::initializeGL() {
 	glFrustum(-0.5,0.5,-0.5,0.5,5,50);
 
 	//id = createCombinedDisplayList();
+	
+
 	id = createDisplayList();
 	//createVBO();	
 	//bool resultVBO = VBO->bind();
 	//bool resultIBO = IBO->bind();
 }
-
 
 //ran on opening scene too
 void GL3DDrawer::resizeGL(int w, int h){
@@ -202,6 +209,7 @@ void GL3DDrawer::draw3DElements() {
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 }
+
 void GL3DDrawer::draw3DCell() {
     glBegin(GL_QUADS);
     glNormal3f( 0.0f, 0.0f, 1.0f);
@@ -230,6 +238,27 @@ void GL3DDrawer::draw3DCell() {
     
     glEnd();
 
+}
+
+void GL3DDrawer::drawWireFrameCube(){
+
+	glBegin(GL_LINES);
+    glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f(-0.5f, 0.5f, 0.5f);
+    glVertex3f(-0.5f,-0.5f, 0.5f); glVertex3f( 0.5f,-0.5f, 0.5f);
+    glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f( 0.5f, -0.5f, 0.5f);
+    glVertex3f(-0.5f, 0.5f, 0.5f);  glVertex3f(-0.5f, -0.5f, 0.5f);
+
+	glVertex3f( 0.5f, 0.5f, -0.5f); glVertex3f(-0.5f, 0.5f, -0.5f);
+    glVertex3f(-0.5f,-0.5f, -0.5f); glVertex3f( 0.5f,-0.5f, -0.5f);
+    glVertex3f( 0.5f, 0.5f, -0.5f); glVertex3f( 0.5f, -0.5f, -0.5f);
+    glVertex3f(-0.5f, 0.5f, -0.5f);  glVertex3f(-0.5f, -0.5f, -0.5f);
+
+    glVertex3f(-0.5f, 0.5f, -0.5f);  glVertex3f(-0.5f, 0.5f, 0.5f);
+    glVertex3f(0.5f, 0.5f, -0.5f);  glVertex3f(0.5f, 0.5f, 0.5f);
+    glVertex3f(0.5f, -0.5f, -0.5f);  glVertex3f(0.5f, -0.5f, 0.5f);
+    glVertex3f(-0.5f, -0.5f, -0.5f);  glVertex3f(-0.5f, -0.5f, 0.5f);
+    
+    glEnd();
 }
 
 void GL3DDrawer::drawVBO() {
@@ -293,6 +322,10 @@ void GL3DDrawer::createVBO() {
 
 }
 
+void GL3DDrawer::createCombinedVBO() {
+
+
+}
 
 GLuint GL3DDrawer::createDisplayList() {
 
@@ -302,9 +335,12 @@ GLuint GL3DDrawer::createDisplayList() {
 
 	glNewList(cubeDL,GL_COMPILE);
 		draw3DCell();
+		//drawWireFrameCube();
 	glEndList();
 
+
 	return cubeDL;
+
 }
 
 
@@ -340,4 +376,22 @@ GLuint GL3DDrawer::createCombinedDisplayList() {
 	glEndList();
 
 	return cubeDL;
+}
+
+
+void GL3DDrawer::pboShareInit() {
+
+}
+
+void GL3DDrawer::createPBO() {
+	sharedVBO = new QGLBuffer(QGLBuffer::VertexBuffer);
+	VBO->create();
+	VBO->bind();
+
+	//Allocate here
+
+}
+
+void GL3DDrawer::createTexture(){
+
 }

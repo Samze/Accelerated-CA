@@ -29,6 +29,17 @@ private:
 	GLuint createDisplayList();
 	GLuint id;
 	GLuint createCombinedDisplayList();
+	void createCombinedVBO();
+
+	
+	QGLBuffer* sharedVBO; //= new QGLBuffer(QGLBuffer::VertexBuffer);
+	void pboShareInit();
+	void createPBO();
+	void createTexture();
+
+
+	//draw wireframecube
+	void drawWireFrameCube();
 };
 
 #endif // GL3DDRAWER_H

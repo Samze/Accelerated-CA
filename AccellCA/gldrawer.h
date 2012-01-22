@@ -59,8 +59,15 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
+	void wheelEvent(QWheelEvent *event);
+	
 
-	float rot;
+	float yRot;
+	float xRot;
+	float sceneZoom;
+
+	static const int xRotDefault = 15;
+	static const int yRotDefault =  -30;
 };
 
 #endif // GLDRAWER_H

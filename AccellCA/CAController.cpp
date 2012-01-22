@@ -34,11 +34,14 @@ void CAController::start() {
 	int* survNo = new int[2];
 	int* bornNo = new int[1];
 
-	
-	survNo[0] = 26;
-//	survNo[1] = 4;
+	//survNo[0] = 26;
 
-	bornNo[0] = 0;
+//	bornNo[0] = 0;
+	
+	survNo[0] = 5;
+	survNo[1] = 4;
+
+	bornNo[0] = 4;
 
 	//survNo[0] = 26;
 	//survNo[1] = 25;
@@ -58,6 +61,7 @@ void CAController::start() {
 	//bornNo[0] = 17;
 	//bornNo[1] = 18;
 	//bornNo[2] = 19;
+
 	//bornNo[1] = 1;
 	//bornNo[2] = 2;
 	//bornNo[3] = 3;
@@ -67,14 +71,17 @@ void CAController::start() {
 	//bornNo[7] = 7;
 	//bornNo[8] = 8;
 
-	int dim = 40;
-	gen3d->setSurviveNo(survNo,1);
+	int dim = 50;
+
+	int range = 20;
+
+	gen3d->setSurviveNo(survNo,2);
 	gen3d->setBornNo(bornNo,1);
-	gen3d->setStates(2);
+	gen3d->setStates(8);
 	gen3d->neighbourhoodType = gen3d->THREEDMOORE;
-	CA = new CellularAutomata_GPGPU(CellularAutomata::TWO_D,dim,2);
+	CA = new CellularAutomata_GPGPU(CellularAutomata::TWO_D,dim,range);
 	CA->setCARule(gen3d);
-	CA->generate3DGrid(dim,2);
+	CA->generate3DGrid(dim,range);
 	
 	gen3d->neighbourCount = new unsigned int[dim * dim * dim];
 
