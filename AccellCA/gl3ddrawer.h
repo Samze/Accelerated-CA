@@ -31,14 +31,6 @@ private:
 	GLuint createCombinedDisplayList();
 	void createCombinedVBO();
 
-	
-	QGLBuffer* sharedVBO; //= new QGLBuffer(QGLBuffer::VertexBuffer);
-	void pboShareInit();
-	void createPBO();
-	void createTexture();
-
-
-	//draw wireframecube
 	void drawWireFrameCube();
 };
 

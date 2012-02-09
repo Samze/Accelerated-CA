@@ -16,6 +16,13 @@ GL3DDrawer::~GL3DDrawer()
 
 void GL3DDrawer::paintGL(){
 	
+	if (mouseCurrentlyDown) {
+		float normalisedW = ((float)(5 * 2) / width()) * xDifference;
+		float normalisedH = ((float)(5 * 2) / height()) * yDifference;
+	
+		yRot -= normalisedW;
+		xRot -= normalisedH;
+	}
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);	
 	glLoadIdentity();
@@ -34,44 +41,46 @@ void GL3DDrawer::paintGL(){
 	////this should not be passed
 
 	bool dim2D;
-	unsigned int dim = CA->getDIM() * CA->getDIM();
+	//unsigned int dim = CA->getDIM() * CA->getDIM();
 
-	float cellSpace = ((float) width() / CA->getDIM()) / width() ;
+	unsigned int DIM = CA->getCARule()->getLattice()->DIM;
 
-	float trans = -(cellSpace * CA->getDIM()/2) + cellSpace/2;
+
+	float cellSpace = ((float) width() /DIM) / width() ;
+
+	float trans = -(cellSpace * DIM/2) + cellSpace/2;
 
 	glTranslatef(trans,trans,trans);
-
-	unsigned int* grid = CA->getGrid();
 	
-	//todo fix this
-	Generations3D* v3 = dynamic_cast<Generations3D*>(CA->getCARule());
-
+	unsigned int* grid = CA->getCARule()->getLattice()->pFlatGrid;
+	
+	Abstract3DCA* v3 = dynamic_cast<Abstract3DCA*>(CA->getCARule()->getLattice());
+	
 	int count = 0;
 	//TODO this is bad.
-	for(int i = 0; i < CA->getDIM(); i++) {
-		for(int j = 0; j < CA->getDIM(); j++) {	
-				for(int k = 0; k < CA->getDIM(); k++) {
-					int state = grid[k * dim + i * CA->getDIM() + j];
+	for(int i = 0; i < DIM; i++) {
+		for(int j = 0; j < DIM; j++) {	
+				for(int k = 0; k < DIM; k++) {
+					int state = grid[k * (DIM*DIM) + i * DIM + j];
 					unsigned int* neighbours = v3->neighbourCount;
+					int neighCount = neighbours[(k * DIM * DIM) + (i * DIM) + j];
 					if (state >  0) {
-						int neighCount = neighbours[k * dim + i * CA->getDIM() + j];
-						if (neighCount != 26) {
+						/*if (neighCount != 26) {*/
 							CellPos pos;
 							pos.x = i;
 							pos.y = j;
 							pos.z = k;
 							drawCell(pos,cellSpace,state);
-						}
+					/*	}
 						else {
 							count++;
-						}
+						}*/
 					}
-					//qDebug("x = %d, y = %d, z = %d, state = %d", i,j,k, grid[k * dim + i * CA->getDIM() + j]);
+					//qDebug("x = %d, y = %d, z = %d, state = %d, liveNeighs = %d", i,j,k, grid[(k * DIM * DIM) + (i * DIM) + j],neighCount);
 				}
 			}
 		}
-	qDebug("Number skipped = %d",count);
+	//qDebug("Number skipped = %d",count);
 	}
 	//qDebug("Done");
 	//rot += 1;
@@ -93,16 +102,16 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	int states = CA->getCARule()->getNoStates();
 	//int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
 
-	//float colourValue = 1 - ((float)state / states);
-	//r = colourValue;
+	float colourValue = 1 - ((float)state / states);
+	r = colourValue;
 	
-	float third = (float)states / 3;
+	//float third = (float)states / 3;
 
 	//float r = state < third ? state/third : 0;
 	//float g = state < third && state < third * 2 ? state/third * 2: 0;
 	//float b = state < third * 3? state/third * 3: 0;
 
-	int stateRange = (state / third);
+	/*int stateRange = (state / third);
 
 	int val = state - (stateRange * third);
 
@@ -110,7 +119,7 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	
 	if(stateRange == 0) r = colourValue;
 	if(stateRange == 1) g = colourValue;
-	if(stateRange >= 2) b = colourValue;
+	if(stateRange >= 2) b = colourValue;*/
 
 
 //	glMaterialf(r,g,b);
@@ -376,22 +385,4 @@ GLuint GL3DDrawer::createCombinedDisplayList() {
 	glEndList();
 
 	return cubeDL;
-}
-
-
-void GL3DDrawer::pboShareInit() {
-
-}
-
-void GL3DDrawer::createPBO() {
-	sharedVBO = new QGLBuffer(QGLBuffer::VertexBuffer);
-	VBO->create();
-	VBO->bind();
-
-	//Allocate here
-
-}
-
-void GL3DDrawer::createTexture(){
-
 }

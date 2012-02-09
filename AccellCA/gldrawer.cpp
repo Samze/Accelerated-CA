@@ -14,6 +14,8 @@ GLDrawer::GLDrawer(QWidget *parent)
 	yRot = yRotDefault;
 	xRot = xRotDefault;
 
+	mouseCurrentlyDown = false;
+
 }
 
 GLDrawer::~GLDrawer()
@@ -39,11 +41,12 @@ void GLDrawer::paintGL(){
 	if(CA != NULL) {
 	////this should not be passed
 
-	unsigned int dim= CA->getDIM();
+	unsigned int DIM = CA->getCARule()->getLattice()->DIM;
 
-	float cellSpace = (float) width() / dim;
+	float cellSpace = (float) width() / DIM;
 
-	unsigned int* grid = CA->getGrid();
+	unsigned int* grid = CA->getCARule()->getLattice()->pFlatGrid;
+
 
 	//unsigned int* grid = new unsigned int[CA->getDIM() * CA->getDIM() * CA->getDIM()];
 	//
@@ -59,13 +62,13 @@ void GLDrawer::paintGL(){
 	//}
 
 	//TODO this is bad.
-	for(int i = 0; i < CA->getDIM(); i++) {
-		for(int j = 0; j < CA->getDIM(); j++) {	
-			if (grid[i * CA->getDIM() + j] > 0) { 
+	for(int i = 0; i < DIM; i++) {
+		for(int j = 0; j < DIM; j++) {	
+			if (grid[i * DIM + j] > 0) { 
 				CellPos pos;
 					pos.x = i;
 					pos.y = j;
-					drawCell(pos,cellSpace,grid[i * CA->getDIM() + j]);
+					drawCell(pos,cellSpace,grid[i * DIM + j]);
 			}
 			
 		}
@@ -160,10 +163,17 @@ void GLDrawer::resizeGL(int w, int h){
 
 void GLDrawer::mousePressEvent(QMouseEvent *event) {
    // qDebug("%d, %d\n", event->x(), event->y());
-
 }
+
+void GLDrawer::mouseReleaseEvent(QMouseEvent *event) {
+   // qDebug("%d, %d\n", event->x(), event->y());
+	mouseCurrentlyDown = false;
+}
+
 void GLDrawer::mouseMoveEvent(QMouseEvent *event) {
-    qDebug("%d, %d\n", event->x(), event->y());
+   // qDebug("%d, %d\n", event->x(), event->y());
+	
+	mouseCurrentlyDown = true;
 
 	//Get the center position
 	float midW = width() / 2;
@@ -176,15 +186,8 @@ void GLDrawer::mouseMoveEvent(QMouseEvent *event) {
 	//We want to normalise to this amount, further from center means closer to max
 	float maxRotate = 5;
 
-	float xDifference = midW - xPos;
-	float yDifference = midH - yPos;
-
-	float normalisedW = ((float)(5 * 2) / width()) * xDifference;
-	float normalisedH = ((float)(5 * 2) / height()) * yDifference;
-	
-	yRot -= normalisedW;
-	xRot -= normalisedH;
-
+	xDifference = midW - xPos;
+	yDifference = midH - yPos;
 
 }
 
@@ -222,6 +225,12 @@ void GLDrawer::keyPressEvent(QKeyEvent* event) {
 	case Qt::Key_Return:
 		xRot = xRotDefault;
 		yRot = yRotDefault;
+		break;
+	case Qt::Key_PageDown:
+		sceneZoom -= 1;
+		break;
+	case Qt::Key_PageUp:
+		sceneZoom += 1;
 		break;
     default:
         event->ignore();

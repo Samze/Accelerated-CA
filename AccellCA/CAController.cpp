@@ -24,24 +24,24 @@ void CAController::setView(ICAView *view) {
 	m_view = view;
 }
 
+
 void CAController::start() {
 
+	qDebug("%d", sizeof(int));
+	
 	//Abstract3DCA* gen3d = new Generations3D();
 	
-	Abstract3DCA* gen3d = new Generations3D();
-
-	
-	int* survNo = new int[2];
+	int* survNo = new int[1];
 	int* bornNo = new int[1];
 
 	//survNo[0] = 26;
 
-//	bornNo[0] = 0;
+	//bornNo[0] = 0;
 	
-	survNo[0] = 5;
-	survNo[1] = 4;
+	survNo[0] = 26;
+	//survNo[1] = 3;
 
-	bornNo[0] = 4;
+	bornNo[0] = 0;
 
 	//survNo[0] = 26;
 	//survNo[1] = 25;
@@ -71,19 +71,39 @@ void CAController::start() {
 	//bornNo[7] = 7;
 	//bornNo[8] = 8;
 
+	//100 , 20
+
 	int dim = 50;
 
-	int range = 20;
-
-	gen3d->setSurviveNo(survNo,2);
-	gen3d->setBornNo(bornNo,1);
-	gen3d->setStates(8);
-	gen3d->neighbourhoodType = gen3d->THREEDMOORE;
-	CA = new CellularAutomata_GPGPU(CellularAutomata::TWO_D,dim,range);
-	CA->setCARule(gen3d);
-	CA->generate3DGrid(dim,range);
+	int range = 2;
 	
-	gen3d->neighbourCount = new unsigned int[dim * dim * dim];
+	CA = new CellularAutomata_GPGPU();
+
+	//Abstract2DCA* ab2D = new Abstract2DCA(dim,range);
+	//ab2D->neighbourhoodType = ab2D->MOORE;
+
+	//Generations* gen = new Generations();
+	//gen->lattice = ab2D;
+	//gen->setStates(2);
+	//gen->setSurviveNo(survNo,2);
+	//gen->setBornNo(bornNo,1);
+		
+	Abstract3DCA* ab3D = new Abstract3DCA(dim,range);
+	ab3D->neighbourhoodType = ab3D->MOORE_3D;
+
+	Generations3D* gen = new Generations3D();
+	gen->lattice = ab3D;
+	gen->setStates(2);
+	gen->setSurviveNo(survNo,1);
+	gen->setBornNo(bornNo,1);
+
+	CA->setCARule(gen);
+
+	//CA->generate3DGrid(dim,range);
+
+	//gen3d->neighbourCount = new unsigned int[dim * dim * dim];
+	
+	//CA->initCudaForGL();
 
 	if (CA == NULL) {
 		qWarning("Enter CA before starting");
@@ -95,8 +115,8 @@ void CAController::start() {
 		m_view->updateView(CA);
 	}
 	
-	state = ACTIVE;
-	timer.start(timerTick);
+	//state = ACTIVE;
+	//timer.start(timerTick);
 }
 
 void CAController::stop() {
@@ -114,7 +134,6 @@ void CAController::step() {
 	}
 	
 	tick();
-	float timeTaken = CA->nextTimeStep();
 	
 		//for (int i = 0; i < CA->getDIM(); ++i) {
 		//for (int j = 0; j < CA->getDIM(); ++j) {
@@ -126,7 +145,7 @@ void CAController::step() {
 		//	}
 		//}
 	
-	qDebug("%3.1f",timeTaken);
+	//qDebug("%3.1f",timeTaken);
 }
 
 void CAController::restart() {
@@ -155,40 +174,40 @@ void CAController::tick(){
 }
 
 
-Abstract2DCA* CAController::getCAClass() {
-	Abstract2DCA *outer = new OuterTotalistic();
-	Abstract2DCA *gen = new Generations();
-
-	QList<int>* survNums = parser->ruleData.at(0);
-	QList<int>* bornNums = parser->ruleData.at(1);
-
-	int survSize = (*survNums).size();
-	int* surviveNo = new int[survSize];
-	int count = 0;
-	//Pull this out into a seperate method
-	foreach(int i, *survNums) {
-		surviveNo[count] = i;
-		++count;
-	}
-	
-	int bornSize = (*bornNums).size();
-	int* bornNo = new int[bornSize];
-	count = 0;
-	//Pull this out into a seperate method
-	foreach(int i, *bornNums) {
-		bornNo[count] = i;
-		++count;
-	}
-
-	int stateNum = parser->numStates;
-
-	gen->setSurviveNo(surviveNo,survSize);
-	gen->setBornNo(bornNo,bornSize);
-	gen->setStates(stateNum);
-	gen->neighbourhoodType = outer->MOORE;
-
-	return gen;
-}
+//Abstract2DCA* CAController::getCAClass() {
+//	Abstract2DCA *outer = new OuterTotalistic();
+//	Abstract2DCA *gen = new Generations();
+//
+//	QList<int>* survNums = parser->ruleData.at(0);
+//	QList<int>* bornNums = parser->ruleData.at(1);
+//
+//	int survSize = (*survNums).size();
+//	int* surviveNo = new int[survSize];
+//	int count = 0;
+//	//Pull this out into a seperate method
+//	foreach(int i, *survNums) {
+//		surviveNo[count] = i;
+//		++count;
+//	}
+//	
+//	int bornSize = (*bornNums).size();
+//	int* bornNo = new int[bornSize];
+//	count = 0;
+//	//Pull this out into a seperate method
+//	foreach(int i, *bornNums) {
+//		bornNo[count] = i;
+//		++count;
+//	}
+//
+//	int stateNum = parser->numStates;
+//
+//	gen->setSurviveNo(surviveNo,survSize);
+//	gen->setBornNo(bornNo,bornSize);
+//	gen->setStates(stateNum);
+//	gen->neighbourhoodType = outer->MOORE;
+//
+//	return gen;
+//}
 
 void CAController::createCAFromMCLFormat(QStringList& lines) {
 	resetForNewLoad();
@@ -202,8 +221,8 @@ void CAController::createCAFromMCLFormat(QStringList& lines) {
 
 void CAController::setRulesToCA(){
 	
-	Abstract2DCA* caRules = getCAClass();
-	CA->setCARule(caRules);
+	/*Abstract2DCA* caRules = getCAClass();
+	CA->setCARule(caRules);*/
 }
 
 void CAController::resetForNewLoad() {

@@ -60,11 +60,17 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
 	void wheelEvent(QWheelEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event);
 	
 
 	float yRot;
 	float xRot;
 	float sceneZoom;
+
+	bool mouseCurrentlyDown;
+	
+	float yDifference;
+	float xDifference;
 
 	static const int xRotDefault = 15;
 	static const int yRotDefault =  -30;

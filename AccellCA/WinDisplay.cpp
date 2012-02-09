@@ -4,10 +4,10 @@ WinDisplay::WinDisplay(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
 	ui.setupUi(this);
-
-
+	
 	drawer = new GL3DDrawer(ui.glWidget);
-
+	//drawer = new GLInteropTestDrawer(ui.glWidget);
+	
 	setController(CAController::getInstance());
 }
 

@@ -10,9 +10,10 @@
 #include <QTime>
 #include <qdebug.h>
 #include <QStringList>
+
 #include "gl2ddrawer.h"
 #include "gl3ddrawer.h"
-
+#include "glinteroptestdrawer.h"
 
 //typedef int (__cdecl *MYPROC)(LPWSTR); 
 

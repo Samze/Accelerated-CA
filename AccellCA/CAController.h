@@ -44,9 +44,9 @@ private:
 	void resetForNewLoad();
 
 	State state;
-		int timerTick; //in Milliseconds
-		int cellularDim; //Specifies the width/height for our CA
-		int initSeed; //Random "0 to initseed" chance of each cell being live to start with, lower is a higher chance.
+	int timerTick; //in Milliseconds
+	int cellularDim; //Specifies the width/height for our CA
+	int initSeed; //Random "0 to initseed" chance of each cell being live to start with, lower is a higher chance.
 	
 private:
 	ICAView *m_view; //Weak assosiation, do not release.
