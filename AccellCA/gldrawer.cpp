@@ -1,5 +1,10 @@
 #include "gldrawer.h"
 
+GLDrawer::GLDrawer() {
+	CA = NULL;
+}
+
+
 GLDrawer::GLDrawer(QWidget *parent)
 	: QGLWidget(parent), CA(0)
 {
@@ -9,12 +14,6 @@ GLDrawer::GLDrawer(QWidget *parent)
 
 	setFocusPolicy(Qt::FocusPolicy::ClickFocus);
 
-	//TODO These are all specific to 3D, should not be here
-	sceneZoom = -15;
-	yRot = yRotDefault;
-	xRot = xRotDefault;
-
-	mouseCurrentlyDown = false;
 
 }
 
@@ -24,6 +23,11 @@ GLDrawer::~GLDrawer()
 }
 
 void GLDrawer::initializeGL() {
+
+	int val = QGLWidget::context()->format().openGLVersionFlags();
+
+
+
     glDisable(GL_TEXTURE_2D); // no need for setting the depth up
     glDisable(GL_DEPTH_TEST);
 
@@ -45,51 +49,61 @@ void GLDrawer::paintGL(){
 
 	float cellSpace = (float) width() / DIM;
 
-	unsigned int* grid = CA->getCARule()->getLattice()->pFlatGrid;
+	void* grid = CA->getCARule()->getLattice()->pFlatGrid;
 
+	unsigned int* intGrid = (unsigned int*)grid;
 
-	//unsigned int* grid = new unsigned int[CA->getDIM() * CA->getDIM() * CA->getDIM()];
-	//
-	//int count = 1;
-	//for(int i = 0; i < CA->getDIM(); i++) {
-	//	for(int j = 0; j < CA->getDIM(); j++) {		
-	//		for(int k = 0; k < CA->getDIM(); k++) {
-	//			grid[k * dim + i * CA->getDIM() + j] = count;
-	//			qDebug("%d",count);
-	//			count++;
-	//		}
-	//	}
-	//}
+	for(int i = 0; i < DIM; ++i) {
+		for(int j = 0; j < DIM; ++j) {
+				if (intGrid[i * DIM + j] > 0) {
+					//draw!
+
+					CellPos pos;
+					pos.x = i;
+					pos.y = j;
+
+					drawCell(pos,cellSpace,intGrid[i * DIM + j]);
+				}
+			}
+		}
+
+	return;
+	SCIARA2::Cell* cellGrid = (SCIARA2::Cell*)grid;
 
 	//TODO this is bad.
 	for(int i = 0; i < DIM; i++) {
 		for(int j = 0; j < DIM; j++) {	
-			if (grid[i * DIM + j] > 0) { 
-				CellPos pos;
+			if (cellGrid[i * DIM + j].altitude > 0) { 
+
+				SCIARA2::Cell cell = cellGrid[i * DIM + j];
+				float altitude = cell.altitude;
+				float thickness = cell.thickness;
+
+				float  flowN = cell.outflow[0];
+				float  flowE = cell.outflow[1];
+				float  flowW = cell.outflow[2];
+				float  flowS = cell.outflow[3];
+			
+
+				float flowAvg = (float) (flowN + flowE + flowS + flowW) / 4;
+				
+				if(j == 10) {
+					//qDebug("x = %d, y = %d, alti = %3.3f, thick = %3.3f, flowN = %3.3f, flowE = %3.3f, flowS = %3.3f, flowW = %3.3f", i,j, altitude,thickness,flowN,flowE,flowS,flowW);
+				}
+				if (thickness != 0) {
+					CellPos pos;
 					pos.x = i;
 					pos.y = j;
-					drawCell(pos,cellSpace,grid[i * DIM + j]);
+					drawCell(pos,cellSpace,(int)thickness);
+				}
+
 			}
-			
 		}
 	}
+
 	}
-
 }
-	//for(int i = 0; i < dim; ++i) {
-	//	for(int j = 0; j < CA->getDIM(); ++j) {
-	//			if (grid[i * CA->getDIM() + j] > 0) {
-	//				//draw!
-
-	//				CellPos pos;
-	//				pos.x = i;
-	//				pos.y = j;
-
-	//				drawCell(pos,cellSpace,grid[i * CA->getDIM() + j]);
-	//			}
-	//		}
-	//	}
-	//}
+	
 	//glTranslatef(1.0f,0.0f,0.0f);
 
  //   glBegin(GL_POLYGON);

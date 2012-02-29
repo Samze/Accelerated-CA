@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>627</width>
-    <height>698</height>
+    <width>723</width>
+    <height>795</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,16 +19,16 @@
      <rect>
       <x>10</x>
       <y>0</y>
-      <width>600</width>
-      <height>600</height>
+      <width>641</width>
+      <height>611</height>
      </rect>
     </property>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>610</y>
+      <x>100</x>
+      <y>720</y>
       <width>601</width>
       <height>31</height>
      </rect>
@@ -71,13 +71,85 @@
      </item>
     </layout>
    </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>660</y>
+      <width>161</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QRadioButton" name="radioButton">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>20</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>3D</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>2D</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLineEdit" name="txtDim">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>660</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="txtRange">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>660</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnRandom">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>680</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Random</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>627</width>
+     <width>723</width>
      <height>21</height>
     </rect>
    </property>

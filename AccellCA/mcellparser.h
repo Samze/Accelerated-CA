@@ -1,5 +1,5 @@
-#ifndef LEXICONPARSER_H
-#define LEXICONPARSER_H
+#ifndef MCELLPARSER_H
+#define MCELLPARSER_H
 
 #include <QObject>
 #include "CellularAutomata.h"
@@ -9,17 +9,18 @@
 #include <qmap.h>
 #include <QStringBuilder>
 #include <QDebug>
+#include "ruleparser.h"
 
-class LexiconParser : public QObject
+class MCellParser : public RuleParser
 {
 	Q_OBJECT
 
 public:
-	LexiconParser(QObject *parent = 0);
-	~LexiconParser();
+	MCellParser(QObject *parent = 0);
+	~MCellParser();
 
 public:
-	CellularAutomata* parseContent(QStringList& list);
+	AbstractCellularAutomata* parseContent(QStringList& list);
 	QList<QList<int>*> ruleData;
 	unsigned int numStates;
 
@@ -40,4 +41,4 @@ private:
 	unsigned int getNumberOfStates(QList<int>*);
 };
 
-#endif // LEXICONPARSER_H
+#endif // MCELLPARSER_H

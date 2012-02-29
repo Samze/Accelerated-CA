@@ -8,7 +8,10 @@
 #include "OuterTotalistic.h"
 #include <qregexp.h>
 #include <QStringList>
-#include <lexiconparser.h>
+#include "ruleparser.h"
+
+#include "cellularautomatafactory.h"
+#include "factorymaker.h"
 
 class ICAView;
 
@@ -28,29 +31,48 @@ public: //singleton pattern
 	   ACTIVE,
 	   STOPPED
     };
+	
+	enum Dimension {
+		TWO,
+		THREE
+	};
 
 public:
 	void setView(ICAView *view);
-	CellularAutomata *CA;
-	LexiconParser* parser;
 
+	void setRule(AbstractCellularAutomata*);
+
+	CellularAutomata *CA;
+
+	void setDimension(Dimension);
+
+	void setRandomCA(int dim, int range);
 
 private: 
 	CAController(); //private contructor, singleton pattern
 	CAController(QObject *parent); 
 	~CAController();
 	void operator=(CAController const&); //do not implement
-	Abstract2DCA* getCAClass();
+	
+
+	CellularAutomataFactory* factory;
+
 	void resetForNewLoad();
+	
+	void tempCreate3D();
 
 	State state;
 	int timerTick; //in Milliseconds
-	int cellularDim; //Specifies the width/height for our CA
 	int initSeed; //Random "0 to initseed" chance of each cell being live to start with, lower is a higher chance.
 	
 private:
 	ICAView *m_view; //Weak assosiation, do not release.
 	QTimer timer;
+
+	void startSCIARA();
+
+signals:
+	void newDrawElement(GLDrawer*);
 
 private slots:
 	void start();
@@ -58,7 +80,7 @@ private slots:
 	void step(); //should link to tick
 	void restart();
 	void tick();
-	void createCAFromMCLFormat(QStringList& lines);
+	void parseDefinition(QStringList& lines);
 	void setRulesToCA();
 };
 

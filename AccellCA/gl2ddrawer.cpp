@@ -1,5 +1,9 @@
 #include "gl2ddrawer.h"
 
+GL2DDrawer::GL2DDrawer(){
+
+}
+
 GL2DDrawer::GL2DDrawer(QWidget *parent)
 	: GLDrawer(parent)
 {
@@ -21,6 +25,8 @@ void GL2DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	float b = 0;
 
 	int states = CA->getCARule()->getNoStates();
+
+	//For SCIARA2
 	//int states = CA->getDIM() * CA->getDIM();
 
 	float colourValue = 1 - ((float)state / states);

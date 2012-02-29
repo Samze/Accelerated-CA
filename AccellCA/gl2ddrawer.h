@@ -8,6 +8,7 @@ class GL2DDrawer : public GLDrawer
 	Q_OBJECT
 
 public:
+	GL2DDrawer();
 	GL2DDrawer(QWidget *parent);
 	~GL2DDrawer();
 	

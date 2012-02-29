@@ -1,5 +1,16 @@
 #include "gl3ddrawer.h"
 
+GL3DDrawer::GL3DDrawer() {
+	
+	//TODO These are all specific to 3D, should not be here
+	sceneZoom = -15;
+	yRot = yRotDefault;
+	xRot = xRotDefault;
+
+	mouseCurrentlyDown = false;
+}
+
+
 GL3DDrawer::GL3DDrawer(QWidget *parent) : GLDrawer(parent)
 {
 	VBO = new QGLBuffer(QGLBuffer::VertexBuffer);
@@ -52,7 +63,7 @@ void GL3DDrawer::paintGL(){
 
 	glTranslatef(trans,trans,trans);
 	
-	unsigned int* grid = CA->getCARule()->getLattice()->pFlatGrid;
+	unsigned int* grid = (unsigned int*)CA->getCARule()->getLattice()->pFlatGrid;
 	
 	Abstract3DCA* v3 = dynamic_cast<Abstract3DCA*>(CA->getCARule()->getLattice());
 	
@@ -65,16 +76,16 @@ void GL3DDrawer::paintGL(){
 					unsigned int* neighbours = v3->neighbourCount;
 					int neighCount = neighbours[(k * DIM * DIM) + (i * DIM) + j];
 					if (state >  0) {
-						/*if (neighCount != 26) {*/
+						//if (neighCount != 26) {
 							CellPos pos;
 							pos.x = i;
 							pos.y = j;
 							pos.z = k;
 							drawCell(pos,cellSpace,state);
-					/*	}
-						else {
-							count++;
-						}*/
+					//	}
+						//else {
+						//	count++;
+						//}
 					}
 					//qDebug("x = %d, y = %d, z = %d, state = %d, liveNeighs = %d", i,j,k, grid[(k * DIM * DIM) + (i * DIM) + j],neighCount);
 				}
@@ -90,9 +101,9 @@ void GL3DDrawer::paintGL(){
 void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	
 	
-	//float x = pos.x;
-	//float y = pos.y;
-	//float z = pos.z;
+	float x = pos.x;
+	float y = pos.y;
+	float z = pos.z;
 
 
 	float r = 0;
@@ -102,16 +113,16 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	int states = CA->getCARule()->getNoStates();
 	//int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
 
-	float colourValue = 1 - ((float)state / states);
-	r = colourValue;
+	//float colourValue = 1 - ((float)state / states);
+	//r = colourValue;
 	
-	//float third = (float)states / 3;
+	float third = (float)states / 3;
 
 	//float r = state < third ? state/third : 0;
 	//float g = state < third && state < third * 2 ? state/third * 2: 0;
 	//float b = state < third * 3? state/third * 3: 0;
 
-	/*int stateRange = (state / third);
+	int stateRange = (state / third);
 
 	int val = state - (stateRange * third);
 
@@ -119,8 +130,15 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	
 	if(stateRange == 0) r = colourValue;
 	if(stateRange == 1) g = colourValue;
-	if(stateRange >= 2) b = colourValue;*/
+	if(stateRange >= 2) b = colourValue;
+	
+	//Creates cool coloured map
 
+	int DIM = CA->getCARule()->getLattice()->DIM;
+
+	r = ((float)1.0 / DIM) * x;
+	g = ((float)1.0 / DIM) * y;
+	b = ((float)1.0 / DIM) * z;
 
 //	glMaterialf(r,g,b);
 	glColor3f(r,g,b);
@@ -141,7 +159,8 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	//glRotatef(rot,0.0f,1.0f,0.0f);
 	//glRotatef(rot,1.0f,1.0f,1.0f);
 
-	float scaledSpace = cellSpace - (cellSpace * 0.1);
+	//include this comment to allow for a seperation of cubes.
+	float scaledSpace = cellSpace ;//- (cellSpace * 0.1);
 	glScalef(scaledSpace,scaledSpace, scaledSpace);
 	
 	//glScalef(cellSpace- 0.05,cellSpace- 0.05,cellSpace - 0.05);
@@ -153,6 +172,10 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 }
 
 void GL3DDrawer::initializeGL() {
+
+	QGLFormat format;
+
+	format.defaultFormat();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHT0);

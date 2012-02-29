@@ -9,6 +9,7 @@ class GL3DDrawer : public GLDrawer
 	Q_OBJECT
 
 public:
+	GL3DDrawer();
 	GL3DDrawer(QWidget *parent);
 	~GL3DDrawer();
 

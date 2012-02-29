@@ -15,6 +15,9 @@
 #include "gl3ddrawer.h"
 #include "glinteroptestdrawer.h"
 
+#include "cellularautomatafactory.h"
+#include "factorymaker.h"
+
 //typedef int (__cdecl *MYPROC)(LPWSTR); 
 
 class WinDisplay : public QMainWindow, public ICAView
@@ -39,6 +42,9 @@ class WinDisplay : public QMainWindow, public ICAView
 	private slots:
 		void on_btnLoadFile_clicked();
 		void on_btnRestart_clicked();
+		void setDimension2D(bool);
+		void setRandomCA();
+		void setGLDrawer(GLDrawer* drawer);
 
 	signals:
 		void setCAFromMCLFormat(QStringList&);

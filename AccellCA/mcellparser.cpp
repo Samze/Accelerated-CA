@@ -1,12 +1,12 @@
-#include "lexiconparser.h"
+#include "mcellparser.h"
 
-LexiconParser::LexiconParser(QObject *parent)
-	: QObject(parent)
+MCellParser::MCellParser(QObject *parent)
+	: RuleParser(parent)
 {
 
 }
 
-LexiconParser::~LexiconParser()
+MCellParser::~MCellParser()
 {
 	foreach(QList<int>* list, ruleData) {
 		delete list;
@@ -15,7 +15,7 @@ LexiconParser::~LexiconParser()
 }
 
 
-CellularAutomata* LexiconParser::parseContent(QStringList& lines)
+AbstractCellularAutomata* MCellParser::parseContent(QStringList& lines)
 {
 	//Create a map with our key/values
 	foreach (QString line, lines) {
@@ -46,15 +46,50 @@ CellularAutomata* LexiconParser::parseContent(QStringList& lines)
 	}
 
 	unsigned int *pFlatGrid = parseLattice(tagDataMap.value("#L"));
-	
-	CellularAutomata* CA = new CellularAutomata_GPGPU();
-	//CellularAutomata* CA = new CellularAutomata_GPGPU(pFlatGrid,DIM);
 
-	return CA;
+	QList<int>* survNums = ruleData.at(0);
+	QList<int>* bornNums = ruleData.at(1);
+
+	int survSize = (*survNums).size();
+	int* surviveNo = new int[survSize];
+	int count = 0;
+	//Pull this out into a seperate method
+	foreach(int i, *survNums) {
+		surviveNo[count] = i;
+		++count;
+	}
+	
+	int bornSize = (*bornNums).size();
+	int* bornNo = new int[bornSize];
+	count = 0;
+	//Pull this out into a seperate method
+	foreach(int i, *bornNums) {
+		bornNo[count] = i;
+		++count;
+	}
+
+	int stateNum = numStates;
+
+	Generations* gen = new Generations();
+
+	Abstract2DCA* ca2d = new Abstract2DCA();
+	ca2d->neighbourhoodType = Abstract2DCA::MOORE;
+	ca2d->DIM = DIM;
+	
+	gen->lattice = ca2d;
+
+	gen->setSurviveNo(surviveNo,survSize);
+	gen->setBornNo(bornNo,bornSize);
+	gen->setStates(stateNum);
+
+
+	ca2d->pFlatGrid = (void*)pFlatGrid;
+
+	return gen;
 }
 
 
-QString LexiconParser::getTag(const QString& line){
+QString MCellParser::getTag(const QString& line){
 	    
 	QRegExp rx(".+\\s");    
 	QStringList caplist;
@@ -72,7 +107,7 @@ QString LexiconParser::getTag(const QString& line){
 	return returnString;
 }
 
-QString LexiconParser::getData(const QString& line, const QString& tag) {
+QString MCellParser::getData(const QString& line, const QString& tag) {
 	
 	int index = line.indexOf(tag);
 
@@ -84,7 +119,7 @@ QString LexiconParser::getData(const QString& line, const QString& tag) {
 }
 
 
-int LexiconParser::parseBoardSize(const QString& data) {
+int MCellParser::parseBoardSize(const QString& data) {
 
 	//Will be in the format 200x200
 	QStringList list = data.split("x");
@@ -98,7 +133,7 @@ int LexiconParser::parseBoardSize(const QString& data) {
 	return 0;
 }
 
-void LexiconParser::parseRules(const QString& data) {
+void MCellParser::parseRules(const QString& data) {
 	
 	QStringList list = data.split("/");
 
@@ -116,7 +151,7 @@ void LexiconParser::parseRules(const QString& data) {
 	}
 }
 
-unsigned int* LexiconParser::parseLattice(const QString& data) {
+unsigned int* MCellParser::parseLattice(const QString& data) {
 	unsigned int* pFlatGrid = new unsigned int[DIM * DIM];
 	
 
@@ -206,7 +241,7 @@ unsigned int* LexiconParser::parseLattice(const QString& data) {
 }
 
 
-unsigned int* LexiconParser::centerLattice(unsigned int* lattice, int i, int j){
+unsigned int* MCellParser::centerLattice(unsigned int* lattice, int i, int j){
 
 	unsigned int* pFlatGrid = new unsigned int[DIM * DIM];
 	//Zero everything...for performance could use a ternary operator below instead..
@@ -242,14 +277,14 @@ unsigned int* LexiconParser::centerLattice(unsigned int* lattice, int i, int j){
 	return pFlatGrid;
 }
 
-unsigned int LexiconParser::getNumericalForLeter(const char c) {
+unsigned int MCellParser::getNumericalForLeter(const char c) {
 
 	//64 is the ACSII number for A - 1, must be caps
 	unsigned int t = (int)c - 64;
 	return t;
 }
 
-unsigned int LexiconParser::getNumberOfStates(QList<int>* stateAsIntList) {
+unsigned int MCellParser::getNumberOfStates(QList<int>* stateAsIntList) {
 
 	QString builtState;
 

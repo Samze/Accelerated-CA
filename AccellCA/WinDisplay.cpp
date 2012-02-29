@@ -4,11 +4,17 @@ WinDisplay::WinDisplay(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
 	ui.setupUi(this);
-	
-	drawer = new GL3DDrawer(ui.glWidget);
-	//drawer = new GLInteropTestDrawer(ui.glWidget);
-	
+
+	//Null this
+	drawer = NULL;
+	//Default to 2D
+
+	//Maybe should store controller as a member variable using something like this..
+	//CAController* controller = &CAController::getInstance();
+
 	setController(CAController::getInstance());
+
+	connect(ui.radioButton_2,SIGNAL(toggled(bool)),this,SLOT(setDimension2D(bool)));
 }
 
 WinDisplay::~WinDisplay()
@@ -36,8 +42,12 @@ void WinDisplay::setController(CAController &controller) {
 	
 	connect(ui.btnRestart,SIGNAL(clicked()),&controller,SLOT(restart()));	
 	connect(ui.btnLoadFile,SIGNAL(clicked()),&controller,SLOT(stop()));
+	
+	connect(ui.btnRandom,SIGNAL(clicked()),this,SLOT(setRandomCA()));
 
-	connect(this,SIGNAL(setCAFromMCLFormat(QStringList&)),&controller,SLOT(createCAFromMCLFormat(QStringList&)));
+	connect(this,SIGNAL(setCAFromMCLFormat(QStringList&)),&controller,SLOT(parseDefinition(QStringList&)));
+
+	connect(&controller,SIGNAL(newDrawElement(GLDrawer*)),this,SLOT(setGLDrawer(GLDrawer*)));
 }
 
 void WinDisplay::on_btnLoadFile_clicked() {
@@ -78,5 +88,40 @@ void WinDisplay::on_btnRestart_clicked() {
 	if (!fileContents.isEmpty()) {
 		emit setCAFromMCLFormat(fileContents);
 	}
+
+}
+
+void WinDisplay::setDimension2D(bool twoDim){
+
+	CAController* controller = &CAController::getInstance();
+
+	if(twoDim == true) {
+		controller->setDimension(CAController::TWO);
+	}
+	else {
+		controller->setDimension(CAController::THREE);
+	}
+}
+
+void WinDisplay::setGLDrawer(GLDrawer* newDrawer){
+	
+	if(drawer == NULL || drawer != newDrawer) {
+		drawer = newDrawer;
+		drawer->setParent(ui.glWidget);
+		drawer->show(); //This flickrs
+		drawer->setGeometry(ui.glWidget->geometry());
+	}
+}
+
+
+void WinDisplay::setRandomCA(){
+
+	CAController* controller = &CAController::getInstance();
+
+	int size = ui.txtDim->text().toInt();
+
+	int random = ui.txtRange->text().toInt();
+
+	controller->setRandomCA(size,random);
 
 }
