@@ -11,6 +11,21 @@ CellularAutomata2DFactory::~CellularAutomata2DFactory()
 
 }
 
+AbstractCellularAutomata* CellularAutomata2DFactory::createRule(const QString& type){
+
+
+	if(type == "Generations"){
+		Generations* gen = new Generations();
+		return gen;
+	}else if(type == "Outer Totalistic"){
+		Generations* gen = new Generations();
+		return gen;
+	}
+	else {
+		qWarning("Type not recognised");
+	}
+}
+
 AbstractCellularAutomata* CellularAutomata2DFactory::createRule(int size, int range) {
 
 	Generations* generations = new Generations();
@@ -23,7 +38,7 @@ AbstractCellularAutomata* CellularAutomata2DFactory::createRule(int size, int ra
 	//survNo[1] = 7;
 
 	//Create our 2D Lattice and add it to our rule.
-	Abstract2DCA* lattice = new Abstract2DCA(size,range);
+	Abstract2DCA* lattice = new Abstract2DCA(size,size,range);
 	lattice->neighbourhoodType = Abstract2DCA::MOORE;
 
 	generations->lattice = lattice;
@@ -38,6 +53,23 @@ AbstractCellularAutomata* CellularAutomata2DFactory::createRule(int size, int ra
 
 	return generations;
 	
+}
+
+AbstractLattice* CellularAutomata2DFactory::createLattice(int size, const QString& neighbourhoodType, int random){
+
+	//Create our 2D Lattice and add it to our rule.
+	Abstract2DCA* lattice = new Abstract2DCA(size,size,random);
+
+	if(neighbourhoodType == "Moore"){
+		lattice->neighbourhoodType = Abstract2DCA::MOORE;
+	}
+	else if(neighbourhoodType == "Von Neumann"){
+		lattice->neighbourhoodType = Abstract2DCA::VON_NEUMANN;
+	}
+	else {
+		qWarning("Neighbourhood type not recognised");
+	}
+	return lattice;
 }
 
 

@@ -10,6 +10,7 @@ class CAController;
 
 class ICAView
 {
+
 public:
 	virtual ~ICAView() {}
 
@@ -18,10 +19,9 @@ public:
 	virtual void updateView(CellularAutomata *ca) = 0;
 	virtual void setController(CAController& controller) = 0;
 
-	//Optional
-
 private slots:
-	virtual void setGLDrawer(GLDrawer* drawer){}
+	virtual void newCALoaded(CellularAutomata *ca) = 0;
+	virtual void setGLDrawer(GLDrawer* drawer){}	
 	
 };
 

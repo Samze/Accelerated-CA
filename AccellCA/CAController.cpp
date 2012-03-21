@@ -8,6 +8,7 @@ CAController::CAController() {
 	
 	//Default to 2D.
 	factory = FactoryMaker::GetFactory(TWO);
+
 }
 
 CAController::CAController(QObject *parent)
@@ -33,7 +34,6 @@ void CAController::setView(ICAView *view) {
 	m_view = view;
 	//Call back to the viewer giving them our optional GLwidget.
 	GLDrawer* drawer = factory->createDrawer();
-	
 	emit newDrawElement(drawer);
 }
 
@@ -83,7 +83,7 @@ void CAController::tick(){
 		float timeTaken = CA->nextTimeStep();
 		qDebug("Time taken:%3.1f ms\n",timeTaken);
 
-			int DIM = CA->getCARule()->getLattice()->DIM;
+			int DIM = CA->getCARule()->getLattice()->xDIM;
 
 //	for(int i = 0; i < DIM; i++) {
 		//for(int j = 0; j < DIM; j++) {
@@ -116,10 +116,10 @@ void CAController::parseDefinition(QStringList& lines) {
 	AbstractCellularAutomata* caRule = parser->parseContent(lines);
 	
 	CA = new CellularAutomata_GPGPU();
-
 	CA->setCARule(caRule);
 
 	m_view->updateView(CA);
+	emit newCA(CA);
 }
 
 
@@ -128,10 +128,8 @@ void CAController::setDimension(Dimension dim){
 	factory = FactoryMaker::GetFactory(dim);
 
 	//update GUI	
-
 	GLDrawer* drawer = factory->createDrawer();
 	emit newDrawElement(drawer);
-	
 }
 
 void CAController::setRulesToCA(){
@@ -150,118 +148,59 @@ void CAController::resetForNewLoad() {
 	CA = NULL;
 }
 
-void CAController::setRandomCA(int size, int range){
+void CAController::setRandomLattice(int range){
+	
+	if(CA != NULL) {
+		int size = CA->getCARule()->getLattice()->xDIM;
+		int neigh = CA->getCARule()->getLattice()->neighbourhoodType;
 
-	CA = new CellularAutomata_GPGPU();
+		QString neighStr = Util::getNeighbourhoodName(neigh);
 
-	AbstractCellularAutomata* caRule = factory->createRule(size,range);
+		AbstractLattice* newLattice = factory->createLattice(size,neighStr,range);
+		
+		//HOTFIX this needs fixing in the framework, this is temp fix.
+		int maxBits = CA->getCARule()->getLattice()->maxBits;
+		int noBits = CA->getCARule()->getLattice()->noBits;
+		newLattice->maxBits = maxBits;
+		newLattice->noBits = noBits;
 
-	CA->setCARule(caRule);
-	m_view->updateView(CA);
-
+		CA->getCARule()->setLattice(newLattice);
+		m_view->updateView(CA);
+		emit newCA(CA);
+	}
 }
 
+void CAController::createNewCA(const QString& type, int latticeSize, const QString& neighbourType, 
+								int numStates, const QList<int>& survNum,  const QList<int>& bornNum){
+	
+	CA = new CellularAutomata_GPGPU();
 
-void CAController::tempCreate3D() {
-
-	//
-	//
-	//FactoryMaker::Dimension type = FactoryMaker::TWO_D;
-	//
-	//CellularAutomataFactory* factory = FactoryMaker::GetFactory(type);
+	//Get lattice
+	AbstractLattice* lattice = factory->createLattice(latticeSize,neighbourType,2);
 
 
-	//AbstractCellularAutomata* ca = factory->createRule();
-	//GLDrawer* drawer = factory->createDrawer();
-	//
-	//qDebug("%d", sizeof(int));
-	//
-	////Abstract3DCA* gen3d = new Generations3D();
-	//
-	//int* survNo = new int[16];
-	//int* bornNo = new int[3];
+	//Get rule using lattice
+	AbstractCellularAutomata* caRule = factory->createRule(type);
 
-	////survNo[0] = 26;
+	caRule->setLattice(lattice);
 
-	////bornNo[0] = 0;
-	////
-	////survNo[0] = 5;
-	////survNo[1] = 4;
 
-	////bornNo[0] = 4;
+	Totalistic* totalistCaRule = dynamic_cast<Totalistic*>(caRule);
 
-	//survNo[0] = 26;
-	//survNo[1] = 25;
-	//survNo[2] = 24;
-	//survNo[3] = 23;
-	//survNo[4] = 22;
-	//survNo[5] = 21;
-	//survNo[6] = 20;
-	//survNo[7] = 19;
-	//survNo[8] = 18;
-	//survNo[9] = 17;
-	//survNo[10] = 16;
-	//survNo[11] = 15;
-	//survNo[12] = 14;
-	//survNo[13] = 13;
-	//survNo[14] = 12;
-	//survNo[15] = 11;
+	//Set states
+	totalistCaRule->setStates(numStates);
 
-	//bornNo[0] = 17;
-	//bornNo[1] = 18;
-	//bornNo[2] = 19;
+	int survSize = survNum.size();
+	int* survNums = Util::createDynamicListFromQList(survNum);
 
-	////bornNo[1] = 1;
-	////bornNo[2] = 2;
-	////bornNo[3] = 3;
-	////bornNo[4] = 4;
-	////bornNo[5] = 5;
-	////bornNo[6] = 6;
-	////bornNo[7] = 7;
-	////bornNo[8] = 8;
+	int bornSize = bornNum.size();
+	int* bornNums = Util::createDynamicListFromQList(bornNum);
 
-	////100 , 20
+	totalistCaRule->setSurviveNo(survNums,survSize);
+	totalistCaRule->setBornNo(bornNums,bornSize);
 
-	//int dim = 24;
+	CA->setCARule(totalistCaRule);
 
-	//int range = 2;
-	//
-	//CA = new CellularAutomata_GPGPU();
-
-	////Abstract2DCA* ab2D = new Abstract2DCA(dim,range);
-	////ab2D->neighbourhoodType = ab2D->MOORE;
-
-	////Generations* gen = new Generations();
-	////gen->lattice = ab2D;
-	////gen->setStates(2);
-	////gen->setSurviveNo(survNo,2);
-	////gen->setBornNo(bornNo,1);
-	//	
-	//Abstract3DCA* ab3D = new Abstract3DCA(dim,range);
-	//ab3D->neighbourhoodType = ab3D->MOORE_3D;
-	//
-	//unsigned int* cells = new unsigned int[dim * dim * dim];
-
-	//for (int i = 0; i < dim; ++i) {
-	//	for (int j = 0; j < dim; ++j) {
-	//		for (int k = 0; k < dim; ++k) {
-
-	//		//get random state value bettwen 0 & 1;
-	//		int random = std::rand() % range;
-	//		//assign
-	//		cells[(i * dim) + j + (k * (dim * dim))] = random == range - 1 ? 1 : 0;
-	//		//pFlatGrid[(k * DIM * DIM) + (i * DIM) + j] = 1;
-	//		}
-	//	}
-	//}
-
-	//ab3D->pFlatGrid = cells;
-
-	//Generations3D* gen = new Generations3D();
-	//gen->lattice = ab3D;
-	//gen->setStates(2);
-	//gen->setSurviveNo(survNo,16);
-	//gen->setBornNo(bornNo,3);
-
-	//CA->setCARule(gen);
+	m_view->updateView(CA);
+	emit newCA(CA);
 }

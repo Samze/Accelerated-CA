@@ -10,6 +10,7 @@
 #include <QTime>
 #include <qdebug.h>
 #include <QStringList>
+#include <QStringBuilder>
 
 #include "gl2ddrawer.h"
 #include "gl3ddrawer.h"
@@ -17,6 +18,7 @@
 
 #include "cellularautomatafactory.h"
 #include "factorymaker.h"
+#include "propertydialog.h"
 
 //typedef int (__cdecl *MYPROC)(LPWSTR); 
 
@@ -40,14 +42,28 @@ class WinDisplay : public QMainWindow, public ICAView
 		GLDrawer* drawer;
 
 	private slots:
-		void on_btnLoadFile_clicked();
+		void newCALoaded(CellularAutomata *ca);
+		
+		void on_btnRandom_clicked();
+		void on_btnEditRule_clicked();
+		void on_actionLoad_triggered();
 		void on_btnRestart_clicked();
 		void setDimension2D(bool);
-		void setRandomCA();
 		void setGLDrawer(GLDrawer* drawer);
+	
+		void setupGUIElements();
+		void setupGUIElements(CellularAutomata *ca);
+
+		void on_btnCreateRule_clicked();
+
+		void on_actionNew_triggered();
 
 	signals:
 		void setCAFromMCLFormat(QStringList&);
+		void settingsChanged();
+
+	private:
+		int maxNeighbours; //Used to populate the Surv/Born state combo
 
 };
 

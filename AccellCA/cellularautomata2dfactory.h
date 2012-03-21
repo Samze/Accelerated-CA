@@ -18,8 +18,12 @@ class CellularAutomata2DFactory : public CellularAutomataFactory
 public:
 	CellularAutomata2DFactory(QObject *parent = 0);
 	~CellularAutomata2DFactory();
-
+	
+	virtual AbstractCellularAutomata* createRule(const QString& type);
 	virtual AbstractCellularAutomata* createRule(int size, int range);
+	
+	virtual AbstractLattice* createLattice(int size, const QString& neighbourhoodType, int random = 0);
+
 	virtual GLDrawer* createDrawer();
 	virtual RuleParser* createParser();
 	

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStringList>
 #include "AbstractCellularAutomata.h"
+#include "util.h"
 
 class RuleParser : public QObject
 {

@@ -50,23 +50,13 @@ AbstractCellularAutomata* MCellParser::parseContent(QStringList& lines)
 	QList<int>* survNums = ruleData.at(0);
 	QList<int>* bornNums = ruleData.at(1);
 
+	//Get our dynamic list of survNums
+	int* surviveNo = Util::createDynamicListFromQList(*survNums);
 	int survSize = (*survNums).size();
-	int* surviveNo = new int[survSize];
-	int count = 0;
-	//Pull this out into a seperate method
-	foreach(int i, *survNums) {
-		surviveNo[count] = i;
-		++count;
-	}
-	
+
+	//Get our dynamic list of bornNums
+	int* bornNo = Util::createDynamicListFromQList(*bornNums);
 	int bornSize = (*bornNums).size();
-	int* bornNo = new int[bornSize];
-	count = 0;
-	//Pull this out into a seperate method
-	foreach(int i, *bornNums) {
-		bornNo[count] = i;
-		++count;
-	}
 
 	int stateNum = numStates;
 
@@ -74,7 +64,8 @@ AbstractCellularAutomata* MCellParser::parseContent(QStringList& lines)
 
 	Abstract2DCA* ca2d = new Abstract2DCA();
 	ca2d->neighbourhoodType = Abstract2DCA::MOORE;
-	ca2d->DIM = DIM;
+	ca2d->xDIM = DIM;
+	ca2d->yDIM = DIM;
 	
 	gen->lattice = ca2d;
 

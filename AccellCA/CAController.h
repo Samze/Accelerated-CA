@@ -9,6 +9,7 @@
 #include <qregexp.h>
 #include <QStringList>
 #include "ruleparser.h"
+#include "util.h"
 
 #include "cellularautomatafactory.h"
 #include "factorymaker.h"
@@ -39,15 +40,15 @@ public: //singleton pattern
 
 public:
 	void setView(ICAView *view);
-
 	void setRule(AbstractCellularAutomata*);
 
 	CellularAutomata *CA;
 
 	void setDimension(Dimension);
+	void setRandomLattice(int range);
 
-	void setRandomCA(int dim, int range);
-
+	void createNewCA(const QString& type, int latticeSize, const QString& neighbourType, 
+								int numStates, const QList<int>& survNum,  const QList<int>& bornNum);
 private: 
 	CAController(); //private contructor, singleton pattern
 	CAController(QObject *parent); 
@@ -58,8 +59,6 @@ private:
 	CellularAutomataFactory* factory;
 
 	void resetForNewLoad();
-	
-	void tempCreate3D();
 
 	State state;
 	int timerTick; //in Milliseconds
@@ -73,6 +72,7 @@ private:
 
 signals:
 	void newDrawElement(GLDrawer*);
+	void newCA(CellularAutomata*);
 
 private slots:
 	void start();

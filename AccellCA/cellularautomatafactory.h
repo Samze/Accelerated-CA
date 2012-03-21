@@ -14,6 +14,10 @@ class CellularAutomataFactory : public QObject
 public:
 	CellularAutomataFactory(QObject *parent = 0);
 	virtual ~CellularAutomataFactory(); //Virutal contstructor this abstract factory?
+	
+	virtual AbstractCellularAutomata* createRule(const QString& type) = 0;
+
+	virtual AbstractLattice* createLattice(int size, const QString& neighbourhoodType, int random = 0) = 0;
 
 	virtual AbstractCellularAutomata* createRule(int size, int range) = 0;
 	virtual GLDrawer* createDrawer() = 0;

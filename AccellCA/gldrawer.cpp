@@ -45,7 +45,7 @@ void GLDrawer::paintGL(){
 	if(CA != NULL) {
 	////this should not be passed
 
-	unsigned int DIM = CA->getCARule()->getLattice()->DIM;
+	unsigned int DIM = CA->getCARule()->getLattice()->xDIM;
 
 	float cellSpace = (float) width() / DIM;
 
@@ -168,7 +168,7 @@ void GLDrawer::resizeGL(int w, int h){
 	//clean slate && origin set to top left
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0, w, h, 0);
+	glOrtho(0, w, h, 0, -1, 1);
 
 	//set model and reset matrix
     glMatrixMode(GL_MODELVIEW);

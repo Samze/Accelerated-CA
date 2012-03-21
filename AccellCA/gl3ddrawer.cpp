@@ -54,7 +54,7 @@ void GL3DDrawer::paintGL(){
 	bool dim2D;
 	//unsigned int dim = CA->getDIM() * CA->getDIM();
 
-	unsigned int DIM = CA->getCARule()->getLattice()->DIM;
+	unsigned int DIM = CA->getCARule()->getLattice()->xDIM;
 
 
 	float cellSpace = ((float) width() /DIM) / width() ;
@@ -110,7 +110,10 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	float g = 0;
 	float b = 0;
 
-	int states = CA->getCARule()->getNoStates();
+	Totalistic* totalistic = static_cast<Totalistic*>(CA->getCARule());
+
+	int states = totalistic->getNoStates();
+
 	//int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
 
 	//float colourValue = 1 - ((float)state / states);
@@ -134,7 +137,7 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	
 	//Creates cool coloured map
 
-	int DIM = CA->getCARule()->getLattice()->DIM;
+	int DIM = CA->getCARule()->getLattice()->xDIM;
 
 	r = ((float)1.0 / DIM) * x;
 	g = ((float)1.0 / DIM) * y;
@@ -186,7 +189,7 @@ void GL3DDrawer::initializeGL() {
     //glEnable(GL_BLEND);
     //glEnable(GL_POLYGON_SMOOTH);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0.2, 0.2, 0.2, 1);
 
 	glMatrixMode(GL_PROJECTION);
     glLoadIdentity();

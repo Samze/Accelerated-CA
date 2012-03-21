@@ -24,7 +24,9 @@ void GL2DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 	float g = 0;
 	float b = 0;
 
-	int states = CA->getCARule()->getNoStates();
+	Totalistic* totalistic = static_cast<Totalistic*>(CA->getCARule());
+
+	int states = totalistic->getNoStates();
 
 	//For SCIARA2
 	//int states = CA->getDIM() * CA->getDIM();
