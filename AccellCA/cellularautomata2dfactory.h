@@ -7,7 +7,7 @@
 #include "Generations.h"
 #include "OuterTotalistic.h"
 
-#include "Abstract2DCA.h"
+#include "Lattice2D.h"
 #include "mcellparser.h"
 
 
@@ -23,6 +23,7 @@ public:
 	virtual AbstractCellularAutomata* createRule(int size, int range);
 	
 	virtual AbstractLattice* createLattice(int size, const QString& neighbourhoodType, int random = 0);
+	virtual AbstractLattice* createLattice(int size, const QString& neighbourhoodType, int* grid);
 
 	virtual GLDrawer* createDrawer();
 	virtual RuleParser* createParser();

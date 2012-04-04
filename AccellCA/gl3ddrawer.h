@@ -3,6 +3,11 @@
 
 #include "gldrawer.h"
 #include "qglbuffer.h"
+#include <QVector>
+#include <qvector3d.h>
+#include <QMatrix4x4>
+#include <QList>
+#include <QTime>
 
 class GL3DDrawer : public GLDrawer
 {
@@ -13,6 +18,11 @@ public:
 	GL3DDrawer(QWidget *parent);
 	~GL3DDrawer();
 
+	struct VEC3 {
+		float x;
+		float y;
+		float z;
+	};
 	
 	virtual void drawCell(CellPos pos, float cellSpace,int state);
 	virtual void initializeGL();
@@ -30,9 +40,24 @@ private:
 	GLuint createDisplayList();
 	GLuint id;
 	GLuint createCombinedDisplayList();
+	
 	void createCombinedVBO();
-
 	void drawWireFrameCube();
+	
+	void paintGLVBO();
+	void populateIndexBuffer();
+	void populateVertexList();
+
+	//Size 24
+	//QVector<GLuint>* getIndicesForCell(int x, int y, int z);
+
+	GLfloat* vertexList;
+	GLuint* indexList;
+
+	bool setupVBO;
+
+	int newIndiceNum;
+
 };
 
 #endif // GL3DDRAWER_H

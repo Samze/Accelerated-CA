@@ -2,8 +2,10 @@
 #define UTIL_H
 
 #include <QObject>
-#include <Abstract2DCA.h>
-#include <Abstract3DCA.h>
+#include <Lattice2D.h>
+#include <Lattice3D.h>
+
+//Forward declaration
 
 class Util : public QObject
 {
@@ -15,8 +17,10 @@ public:
 
 	static int* createDynamicListFromQList(const QList<int>& list);
 	static QList<int>* createQListFromDynamicList(int* list, int size);
-
 	static QString getNeighbourhoodName(int maxNeighhoodsize);
+	static int* deepArrayCopy(int* list, int size);
+
+	static int getDimensionType(int maxNeighhoodsize);
 
 private:
 	

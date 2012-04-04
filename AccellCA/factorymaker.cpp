@@ -20,10 +20,10 @@ CellularAutomataFactory* FactoryMaker::GetFactory(int type){
 	//TODO Memory leak here
 	//TODO enum
 	switch(type) {
-		case 0 :
+		case 2 :
 			factory = new CellularAutomata2DFactory();
 			break;
-		case 1:
+		case 3:
 			factory = new CellularAutomata3DFactory();
 			break;
 	};

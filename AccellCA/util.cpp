@@ -42,11 +42,34 @@ QList<int>* Util::createQListFromDynamicList(int* list, int size){
 
 QString Util::getNeighbourhoodName(int maxNeighhoodsize){
 
-	if(maxNeighhoodsize == Abstract3DCA::MOORE_3D || maxNeighhoodsize == Abstract2DCA::MOORE) {
+	if(maxNeighhoodsize == Lattice3D::MOORE_3D || maxNeighhoodsize == Lattice2D::MOORE) {
 		return QString("Moore");
 	}
-	else if(maxNeighhoodsize == Abstract3DCA::VON_NEUMANN_3D || maxNeighhoodsize == Abstract2DCA::VON_NEUMANN) {
+	else if(maxNeighhoodsize == Lattice3D::VON_NEUMANN_3D || maxNeighhoodsize == Lattice2D::VON_NEUMANN) {
 		return QString("Von Neumann");
 	}
 	return NULL;
+}
+
+
+int Util::getDimensionType(int maxNeighhoodsize) {
+
+	if(maxNeighhoodsize == Lattice3D::MOORE_3D || maxNeighhoodsize == Lattice3D::VON_NEUMANN_3D) {
+		return 3;
+	}
+	else if(maxNeighhoodsize == Lattice2D::MOORE || maxNeighhoodsize == Lattice2D::VON_NEUMANN) {
+		return 2;
+	}
+	qWarning("Neighbhood not detetected");
+	return 0;
+}
+
+
+int* Util::deepArrayCopy(int* list, int size){
+
+	int* newList = new int[size];
+	for(int i =0 ; i <size;i++) {
+		newList[i] = list[i];
+	}
+	return newList;
 }

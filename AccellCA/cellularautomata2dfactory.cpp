@@ -15,11 +15,11 @@ AbstractCellularAutomata* CellularAutomata2DFactory::createRule(const QString& t
 
 
 	if(type == "Generations"){
-		Generations* gen = new Generations();
-		return gen;
+		Generations* caRule = new Generations();
+		return caRule;
 	}else if(type == "Outer Totalistic"){
-		Generations* gen = new Generations();
-		return gen;
+		OuterTotalistic* caRule = new OuterTotalistic();
+		return caRule;
 	}
 	else {
 		qWarning("Type not recognised");
@@ -38,8 +38,8 @@ AbstractCellularAutomata* CellularAutomata2DFactory::createRule(int size, int ra
 	//survNo[1] = 7;
 
 	//Create our 2D Lattice and add it to our rule.
-	Abstract2DCA* lattice = new Abstract2DCA(size,size,range);
-	lattice->neighbourhoodType = Abstract2DCA::MOORE;
+	Lattice2D* lattice = new Lattice2D(size,size,range);
+	lattice->neighbourhoodType = Lattice2D::MOORE;
 
 	generations->lattice = lattice;
 
@@ -58,13 +58,13 @@ AbstractCellularAutomata* CellularAutomata2DFactory::createRule(int size, int ra
 AbstractLattice* CellularAutomata2DFactory::createLattice(int size, const QString& neighbourhoodType, int random){
 
 	//Create our 2D Lattice and add it to our rule.
-	Abstract2DCA* lattice = new Abstract2DCA(size,size,random);
+	Lattice2D* lattice = new Lattice2D(size,size,random);
 
 	if(neighbourhoodType == "Moore"){
-		lattice->neighbourhoodType = Abstract2DCA::MOORE;
+		lattice->neighbourhoodType = Lattice2D::MOORE;
 	}
 	else if(neighbourhoodType == "Von Neumann"){
-		lattice->neighbourhoodType = Abstract2DCA::VON_NEUMANN;
+		lattice->neighbourhoodType = Lattice2D::VON_NEUMANN;
 	}
 	else {
 		qWarning("Neighbourhood type not recognised");
@@ -72,6 +72,21 @@ AbstractLattice* CellularAutomata2DFactory::createLattice(int size, const QStrin
 	return lattice;
 }
 
+AbstractLattice* CellularAutomata2DFactory::createLattice(int size, const QString& neighbourhoodType, int* grid){
+	
+	Lattice2D* lattice = new Lattice2D(grid,size,size);
+
+	if(neighbourhoodType == "Moore"){
+		lattice->neighbourhoodType = Lattice2D::MOORE;
+	}
+	else if(neighbourhoodType == "Von Neumann"){
+		lattice->neighbourhoodType = Lattice2D::VON_NEUMANN;
+	}
+	else {
+		qWarning("Neighbourhood type not recognised");
+	}
+	return lattice;
+}
 
 GLDrawer* CellularAutomata2DFactory::createDrawer() {
 

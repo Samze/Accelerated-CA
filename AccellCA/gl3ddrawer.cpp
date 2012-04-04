@@ -3,19 +3,37 @@
 GL3DDrawer::GL3DDrawer() {
 	
 	//TODO These are all specific to 3D, should not be here
+
+	VBO = new QGLBuffer(QGLBuffer::VertexBuffer);
+	IBO = new QGLBuffer(QGLBuffer::IndexBuffer);
+
 	sceneZoom = -15;
 	yRot = yRotDefault;
 	xRot = xRotDefault;
 
 	mouseCurrentlyDown = false;
+	setupVBO = false;
+
+	setFocusPolicy(Qt::FocusPolicy::ClickFocus);
+	
 }
 
 
 GL3DDrawer::GL3DDrawer(QWidget *parent) : GLDrawer(parent)
 {
+
 	VBO = new QGLBuffer(QGLBuffer::VertexBuffer);
 	IBO = new QGLBuffer(QGLBuffer::IndexBuffer);
 
+	sceneZoom = -15;
+	yRot = yRotDefault;
+	xRot = xRotDefault;
+
+	mouseCurrentlyDown = false;
+	setupVBO = false;
+
+
+	setFocusPolicy(Qt::FocusPolicy::ClickFocus);
 }
 
 GL3DDrawer::~GL3DDrawer()
@@ -26,7 +44,10 @@ GL3DDrawer::~GL3DDrawer()
 }
 
 void GL3DDrawer::paintGL(){
-	
+
+	//paintGLVBO();
+	//return;
+
 	if (mouseCurrentlyDown) {
 		float normalisedW = ((float)(5 * 2) / width()) * xDifference;
 		float normalisedH = ((float)(5 * 2) / height()) * yDifference;
@@ -65,7 +86,7 @@ void GL3DDrawer::paintGL(){
 	
 	unsigned int* grid = (unsigned int*)CA->getCARule()->getLattice()->pFlatGrid;
 	
-	Abstract3DCA* v3 = dynamic_cast<Abstract3DCA*>(CA->getCARule()->getLattice());
+	Lattice3D* v3 = dynamic_cast<Lattice3D*>(CA->getCARule()->getLattice());
 	
 	int count = 0;
 	//TODO this is bad.
@@ -114,54 +135,47 @@ void GL3DDrawer::drawCell(CellPos pos, float cellSpace,int state) {
 
 	int states = totalistic->getNoStates();
 
+	if(states == 2) {
+		int DIM = CA->getCARule()->getLattice()->xDIM;
+			
+		//Creates cool coloured map
+		r = ((float)1.0 / DIM) * x;
+		g = ((float)1.0 / DIM) * y;
+		b = ((float)1.0 / DIM) * z;
+	}
+	else {
+		float third = (float)states / 3;
+
+		//float r = state < third ? state/third : 0;
+		//float g = state < third && state < third * 2 ? state/third * 2: 0;
+		//float b = state < third * 3? state/third * 3: 0;
+
+		int stateRange = (state / third);
+
+		int val = state - (stateRange * third);
+
+		float colourValue = 1 - ((float)val / third);
+	/*
+		if(stateRange == 0) r = colourValue;
+		if(stateRange == 1) g = colourValue;
+		if(stateRange >= 2) b = colourValue;*/
+
+		float colourValue2 = 1 - (((float)state / states) * 0.8) + 0.2;
+		r = colourValue2;
+
+	}
 	//int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
 
 	//float colourValue = 1 - ((float)state / states);
 	//r = colourValue;
 	
-	float third = (float)states / 3;
 
-	//float r = state < third ? state/third : 0;
-	//float g = state < third && state < third * 2 ? state/third * 2: 0;
-	//float b = state < third * 3? state/third * 3: 0;
-
-	int stateRange = (state / third);
-
-	int val = state - (stateRange * third);
-
-	float colourValue = 1 - ((float)val / third);
 	
-	if(stateRange == 0) r = colourValue;
-	if(stateRange == 1) g = colourValue;
-	if(stateRange >= 2) b = colourValue;
-	
-	//Creates cool coloured map
-
-	int DIM = CA->getCARule()->getLattice()->xDIM;
-
-	r = ((float)1.0 / DIM) * x;
-	g = ((float)1.0 / DIM) * y;
-	b = ((float)1.0 / DIM) * z;
-
-//	glMaterialf(r,g,b);
 	glColor3f(r,g,b);
-
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
-	//glTranslatef(cellSpace * x,cellSpace * y, (cellSpace * z) - 5.5f);
 
 	glPushMatrix();
 	glTranslatef(pos.x * cellSpace,pos.y * cellSpace, pos.z * cellSpace);
 	
-	//glTranslatef(x/CA->getDIM(),y/CA->getDIM(), z/CA->getDIM());
-	//glTranslatef((float)x/CA->getDIM(),(float)y/CA->getDIM(), (float)z/CA->getDIM());
-	//glScalef(1/cellSpace - 0.1, 1/cellSpace- 0.1, 1/cellSpace- 0.1); //minus an ammount here to get a "grid" look if desired
-
-	//glRotatef(30,0.0f,1.0f,0.0f);
-	//glTranslatef(0,0, -35.5);
-	//glRotatef(rot,0.0f,1.0f,0.0f);
-	//glRotatef(rot,1.0f,1.0f,1.0f);
-
 	//include this comment to allow for a seperation of cubes.
 	float scaledSpace = cellSpace ;//- (cellSpace * 0.1);
 	glScalef(scaledSpace,scaledSpace, scaledSpace);
@@ -185,7 +199,7 @@ void GL3DDrawer::initializeGL() {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_COLOR_MATERIAL);
-	//glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE); //Does this do anything?
     //glEnable(GL_BLEND);
     //glEnable(GL_POLYGON_SMOOTH);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -206,16 +220,29 @@ void GL3DDrawer::initializeGL() {
 
 //ran on opening scene too
 void GL3DDrawer::resizeGL(int w, int h){
+	
+	int dX = 0;
+	int dY = 0;
+
+	if(w > h) {
+		dX = w - h;
+		w = h;
+	}
+	else {
+		dY = h - w;
+		h = w;
+	}
+
+	dX /= 2;
+	dY /= 2;
 
 	//setup view
-	glViewport(0, 0, w, h);
-	
-	//clean slate && origin set to top left
-
+	glViewport(dX, dY, w, h);
 
 	//set model and reset matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+	
 }
 
 void GL3DDrawer::draw3DElements() {
@@ -277,10 +304,15 @@ void GL3DDrawer::draw3DCell() {
 
 void GL3DDrawer::drawWireFrameCube(){
 
+	glDisable(GL_LIGHTING);
+
 	glBegin(GL_LINES);
     glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f(-0.5f, 0.5f, 0.5f);
+
     glVertex3f(-0.5f,-0.5f, 0.5f); glVertex3f( 0.5f,-0.5f, 0.5f);
+
     glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f( 0.5f, -0.5f, 0.5f);
+
     glVertex3f(-0.5f, 0.5f, 0.5f);  glVertex3f(-0.5f, -0.5f, 0.5f);
 
 	glVertex3f( 0.5f, 0.5f, -0.5f); glVertex3f(-0.5f, 0.5f, -0.5f);
@@ -294,27 +326,157 @@ void GL3DDrawer::drawWireFrameCube(){
     glVertex3f(-0.5f, -0.5f, -0.5f);  glVertex3f(-0.5f, -0.5f, 0.5f);
     
     glEnd();
+
+	glEnable(GL_LIGHTING);
 }
+
+void GL3DDrawer::paintGLVBO(){
+
+	if(!setupVBO) {
+		populateVertexList();
+		createVBO();
+		setupVBO = true;
+	}
+
+	if (mouseCurrentlyDown) {
+		float normalisedW = ((float)(5 * 2) / width()) * xDifference;
+		float normalisedH = ((float)(5 * 2) / height()) * yDifference;
+	
+		yRot -= normalisedW;
+		xRot -= normalisedH;
+	}
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode(GL_MODELVIEW);	
+	glLoadIdentity();
+
+	glTranslatef(0,0,sceneZoom);
+
+	glColor3f(0.0,1.0,0.0);
+	
+	glRotatef(xRot,1,0,0);
+	glRotatef(yRot,0,1,0);	
+
+	drawWireFrameCube();	
+	//glCullFace(GL_BACK);
+	
+	if(CA != NULL) {
+	////this should not be passed
+		glScalef(0.01,0.01,0.01);
+
+		populateIndexBuffer();
+		drawVBO();
+	}
+}
+
+void GL3DDrawer::populateIndexBuffer(){
+
+	unsigned int DIM = CA->getCARule()->getLattice()->xDIM;
+
+	unsigned int* grid = (unsigned int*)CA->getCARule()->getLattice()->pFlatGrid;
+
+	Lattice3D* v3 = dynamic_cast<Lattice3D*>(CA->getCARule()->getLattice());
+
+	QVector<VEC3> list;
+
+	int count = 0;
+	//TODO this is bad.
+	for(int i = 0; i < DIM; i++) {
+		for(int j = 0; j < DIM; j++) {	
+			for(int k = 0; k < DIM; k++) {
+				int state = grid[k * (DIM*DIM) + i * DIM + j];
+				unsigned int* neighbours = v3->neighbourCount;
+				int neighCount = neighbours[(k * DIM * DIM) + (i * DIM) + j];
+				if (state >  0) {
+					VEC3 v;
+					v.x = i;
+					v.y = j;
+					v.z = k;
+					list.append(v);
+				}
+			}
+		}
+	}
+
+	GLuint* data = (GLuint*)IBO->map(QGLBuffer::WriteOnly);
+
+	
+	if(data) {
+
+		int size2 = DIM + 1;
+		int sizeSquared =  size2 * size2;
+
+		int pos = 0;
+		foreach(VEC3 cell , list) {
+
+			int x = cell.x;
+			int y = cell.y;
+			int z = cell.z;
+
+
+			int XYz = ((sizeSquared) * z) + (size2 * (y+1)) + x + 1; // 1,1,0		0
+			int xYz =  ((sizeSquared) * z) + (size2 * (y + 1)) + x; // 0,1,0			1
+			int xyz =  ((sizeSquared) * z) + (size2 * y) + x; // 0,0,0				2
+			int Xyz = ((sizeSquared) * z) + (size2 * y) + x + 1; // 1,0,0			3
+			int XyZ = ((sizeSquared) * (z + 1)) + (size2 * y) + x + 1; // 1,0,1		4
+			int XYZ = ((sizeSquared) * (z + 1)) + (size2 * (y+1)) + x + 1; // 1,1,1	5
+			int xYZ = ((sizeSquared) * (z + 1)) + (size2 * (y+1)) + x; // 0,1,1		6
+			int xyZ =  ((sizeSquared) * (z + 1)) + (size2 * y) + x; // 0,0,1			7
+
+			GLuint indices[] =  {XYz,xYz,xyz,Xyz,   // 24 of indices
+				XYz,Xyz,XyZ,XYZ,
+				XYz,XYZ,xYZ,xYz,
+				xYz,xYZ,xyZ,xyz,
+				xyZ,XyZ,Xyz,xyz,
+				XyZ,xyZ,xYZ,XYZ};
+
+			for(int i = 0; i < 8 ; i++) {
+
+				int idx = i * 3;
+
+				data[pos + idx] = indices[idx];
+				data[pos + idx + 1] = indices[idx + 1];
+				data[pos + idx + 2] = indices[idx + 2];
+			}
+
+
+			pos += 24;
+		}
+		newIndiceNum = pos;
+		IBO->unmap();
+	}
+}
+
+
 
 void GL3DDrawer::drawVBO() {
 	
 	//VBO->setUsagePattern(QGLBuffer::StaticDraw);
+	int size = CA->getCARule()->getLattice()->xDIM;
+
+	int indexNum = size * size * size * 24;
+
+	int indexNum2 = newIndiceNum;
+
+	int vertexNum = (size + 1) * (size +1) * (size + 1) * 3;
 
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	
 	glVertexPointer(3,GL_FLOAT,0,0);
+	glColorPointer(3,GL_FLOAT,0,(void*)(sizeof(GLfloat) * vertexNum));
 
-	glDrawElements(GL_QUADS,24, GL_UNSIGNED_BYTE,0);
+	glDrawElements(GL_QUADS,indexNum2, GL_UNSIGNED_INT,0);
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 }
 
-void GL3DDrawer::createVBO() {
-	GLubyte indices[] =  {0,1,2,3,   // 24 of indices
-                0,3,4,5,
-                0,5,6,1,
-				1,6,7,2,
-                7,4,3,2,
-                4,7,6,5};
+void GL3DDrawer::populateVertexList() {
+	
+	QTime timer;
+
+	timer.start();
+	int size = CA->getCARule()->getLattice()->xDIM;
 
 	GLfloat vertices[] =  {0.5f, 0.5f, -0.5f,
 						-0.5f, 0.5f, -0.5f,
@@ -324,6 +486,152 @@ void GL3DDrawer::createVBO() {
 						0.5f, 0.5f, 0.5f,
 						-0.5f, 0.5f, 0.5f,
 						-0.5f,-0.5f, 0.5f};
+
+
+	GLfloat line[] = {1.0f, 1.0f, 1.0f};
+					//0.0f, 0.0f, 1.0f};
+	
+	QVector<VEC3*> vertexVec;
+
+	for(int i = 0; i <= size; i++) {
+
+		for(int j = 0; j <= size; j++) {
+
+			for(int k = 0; k <= size; k++) { //This is here on purpose!
+				
+				//for(int vertIdx = 0; vertIdx < 3; vertIdx++){
+
+					QVector3D v;
+
+					v.setX(line[0]);
+					v.setY(line[1]);
+					v.setZ(line[2]);
+
+					QMatrix4x4 trans;
+
+					trans.translate(i,j,k);
+
+					QVector3D v2 = trans * v;
+
+					VEC3* vec = new VEC3();
+
+					vec->x = v2.x();
+					vec->y = v2.y();
+					vec->z = v2.z();
+
+					vertexVec.append(vec);
+				//}
+
+			}
+		}
+	}
+
+	vertexList = new GLfloat[vertexVec.size() * 3];
+
+	for(int i = 0; i < vertexVec.size(); i++){
+		vertexList[i * 3] = vertexVec.at(i)->x;
+		vertexList[i * 3 + 1] = vertexVec.at(i)->y;
+		vertexList[i * 3 + 2] = vertexVec.at(i)->z;
+	}
+	
+	qDebug("vertex done = %d", timer.elapsed());
+
+	timer.start();
+
+	int sizeSquared = (size + 1)* (size +1);
+	indexList = new GLuint[size * size * size * 24];
+
+	QVector<GLuint> indexVec;
+
+	//populate index list
+	for(int x = 0; x < size; ++x) {
+		for(int y = 0; y < size; ++y) {
+			for(int z = 0; z < size; ++z) {
+
+					//Caps indicates + 1;
+	
+				//QVector<GLuint>* list = getIndicesForCell(x,y,z);
+
+					int size = CA->getCARule()->getLattice()->xDIM;
+
+				int size2 = size + 1;
+
+				int sizeSquared =  size2 * size2;
+
+				int XYz = ((sizeSquared) * z) + (size2 * (y+1)) + x + 1; // 1,1,0		0
+				int xYz =  ((sizeSquared) * z) + (size2 * (y + 1)) + x; // 0,1,0			1
+				int xyz =  ((sizeSquared) * z) + (size2 * y) + x; // 0,0,0				2
+				int Xyz = ((sizeSquared) * z) + (size2 * y) + x + 1; // 1,0,0			3
+				int XyZ = ((sizeSquared) * (z + 1)) + (size2 * y) + x + 1; // 1,0,1		4
+				int XYZ = ((sizeSquared) * (z + 1)) + (size2 * (y+1)) + x + 1; // 1,1,1	5
+				int xYZ = ((sizeSquared) * (z + 1)) + (size2 * (y+1)) + x; // 0,1,1		6
+				int xyZ =  ((sizeSquared) * (z + 1)) + (size2 * y) + x; // 0,0,1			7
+
+				GLuint indices[] =  {XYz,xYz,xyz,Xyz,   // 24 of indices
+					XYz,Xyz,XyZ,XYZ,
+					XYz,XYZ,xYZ,xYz,
+					xYz,xYZ,xyZ,xyz,
+					xyZ,XyZ,Xyz,xyz,
+					XyZ,xyZ,xYZ,XYZ};
+
+				for(int i = 0; i < 24; i++){
+					indexVec.append(indices[i]);
+				}
+
+				//delete list;
+			}
+		}
+	}
+
+	for(int i = 0; i < indexVec.size(); i++){
+		indexList[i] = indexVec.at(i);
+	}
+	
+	qDebug("index done = %d", timer.elapsed());
+	qDebug() << "done";
+}
+
+
+void GL3DDrawer::createVBO() {
+	
+
+	int caSize = CA->getCARule()->getLattice()->xDIM;
+	int caSize2 = caSize + 1;
+
+	int vertexNum = caSize2 * caSize2 * caSize2 * 3;
+	int indexNum = caSize * caSize * caSize * 24;
+
+
+	//set colours
+	GLfloat* colours = new GLfloat[vertexNum];
+
+	for(int colourID = 0; colourID < vertexNum / 3; colourID++) {
+		
+		int z = colourID / (caSize2 * caSize2);
+		int y = (colourID - z) / caSize2;
+		int x = colourID % caSize2;
+
+		//Blue/green sliding colours based on position of x/z
+		float r = ((float)1.0 / caSize) * x;
+		float g = ((float)1.0 / caSize) * y;
+		float b = ((float)1.0 / caSize) * z;
+
+		colours[colourID * 3] = r;
+		colours[colourID * 3 + 1] = g;
+		colours[colourID * 3 + 2] = b;
+
+	}
+	
+	//set normals
+	GLfloat* normals = new GLfloat[vertexNum];
+
+	for(int normalsID = 0; normalsID < vertexNum / 3; normalsID++) {
+		
+		normals[normalsID * 3] = 0;
+		normals[normalsID * 3 + 1] = 1; 
+		normals[normalsID * 3 + 2] = 0;
+
+	}
 
 	bool resultVBO;
 	bool resultIBO;
@@ -343,20 +651,28 @@ void GL3DDrawer::createVBO() {
 	}
 
 	VBO->setUsagePattern(QGLBuffer::StaticDraw);
-	IBO->setUsagePattern(QGLBuffer::StaticDraw);
+	IBO->setUsagePattern(QGLBuffer::StreamDraw);
 
-	VBO->allocate(vertices,sizeof(GLfloat) * 24);
-	IBO->allocate(indices,sizeof(GLfloat) * 24);
+	//VBO->allocate(vertexList,sizeof(GLfloat) * vertexNum);
+
+	VBO->allocate(0,sizeof(GLfloat) * vertexNum * 2);
+
+	VBO->write(0,vertexList,sizeof(GLfloat) * vertexNum);
+	VBO->write(sizeof(GLfloat) * vertexNum, colours, sizeof(GLfloat) * vertexNum);
+
+
+	IBO->allocate(indexList,sizeof(GLuint) * indexNum);
 
 	qDebug("%d",VBO->bufferId());
 	qDebug("%d",IBO->bufferId());
 
-	if (VBO->size() != sizeof(GLfloat) * 24) {
+	if (VBO->size() != sizeof(GLfloat) * vertexNum) {
 		qWarning("VBO datasizes do not match");
 	}
 
+	delete[] colours;
 }
-
+	
 void GL3DDrawer::createCombinedVBO() {
 
 

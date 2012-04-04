@@ -2,12 +2,23 @@
 
 CAController::CAController() {
 
-	state = IDLE;
-	connect(&timer, SIGNAL(timeout()),this,SLOT(tick()));
-	timerTick = 1; //in Milliseconds
+	CA = NULL;
+	state = EMPTY;
+
+	connect(&viewTimer, SIGNAL(timeout()),this,SLOT(viewTick()));
+	viewTimer.setInterval(0); //draw as fast as possible
+
+	viewTimer.start();
+
+	connect(&caTimer, SIGNAL(timeout()),this,SLOT(caTick()));
+	timerTick = 100; // default CA to update very 100ms.
 	
 	//Default to 2D.
 	factory = FactoryMaker::GetFactory(TWO);
+	previousLattice = NULL;
+	initialLattice = NULL;
+
+	connect(this,SIGNAL(newCA(CellularAutomata*)),this,SLOT(newCALoaded(CellularAutomata*)));
 
 }
 
@@ -22,6 +33,14 @@ CAController::~CAController()
 	//Do not delete m_view
 	delete CA;
 	delete factory;
+
+	if(initialLattice != NULL) {
+		delete[] initialLattice;
+	}
+
+	if(previousLattice != NULL) {
+		delete[] previousLattice;
+	}
 }
 
 
@@ -37,53 +56,115 @@ void CAController::setView(ICAView *view) {
 	emit newDrawElement(drawer);
 }
 
-void CAController::start() {
+void CAController::start(){
 	
-	if (CA == NULL) {
+	if(state == EMPTY){
 		qWarning("Enter CA before starting");
 	}
-	else {
-		state = ACTIVE;
-		timer.start(timerTick);
+	else if(state == ACTIVE) {
+		stop();
+	}
+	else if(state == LOADED || state == STOPPED) { //Start logic here
+		changeState(ACTIVE);
+		caTimer.start(timerTick);
+	}
+
+}
+
+void CAController::stop(){
+	
+	if(state == ACTIVE) { //stop logic here
+		changeState(STOPPED);
 	}
 }
 
-void CAController::stop() {
-	if (state == ACTIVE){
-		state = STOPPED;
+void CAController::back() {
+	if (state == ACTIVE || state == STOPPED) {
+		stop();
+
+		int* grid = (int*) CA->getCARule()->getLattice()->pFlatGrid;
+
+		//Delete current lattice
+		delete[] grid;
+
+		//copy new one
+		CA->getCARule()->getLattice()->pFlatGrid = (void*)Util::deepArrayCopy(previousLattice, CA->getCARule()->getLattice()->noElements);
+
+		CA->stepNumber -= 1;
+
+		changeState(STOPPED);
 	}
 }
 
-void CAController::step() {
+
+void CAController::forward() {
 	if(state == ACTIVE) {
 		stop();
 	}
-	else { //TODO This will blow up if nothing is set
+	else if(state == LOADED || state == STOPPED){
 		//Run it one tick, then stop.
-		state = ACTIVE;
-		tick();
-		state = STOPPED;
+		changeState(ACTIVE);
+		caTick();
+		changeState(STOPPED);
+	}
+}
+
+
+void CAController::forwardN(){
+	if(state == ACTIVE) {
+		stop();
+	}
+	else if(state == LOADED || state == STOPPED){
+		//Don't render, just run!
+		int N = 200;
+
+		for(int i = 0; i < N; i++) {
+			CA->nextTimeStep();
+		}
+
+		changeState(STOPPED);
 	}
 }
 
 void CAController::restart() {
-	if (state == ACTIVE) {
-		stop();	
+
+	if (state == ACTIVE || state == STOPPED) {
+		changeState(STOPPED);
+
+		int* grid = (int*) CA->getCARule()->getLattice()->pFlatGrid;
+
+		//Delete current lattice
+		delete[] grid;
+
+		//copy new one
+		CA->getCARule()->getLattice()->pFlatGrid = (void*)Util::deepArrayCopy(initialLattice, CA->getCARule()->getLattice()->noElements);
+
+		CA->stepNumber = 0;
+
+		changeState(LOADED);
 	}
-	
-	m_view->updateView(CA);
-	state = IDLE;
 }
 
 
 //This is called every x-time based on timer settings
-void CAController::tick(){
+void CAController::caTick(){
 	
 	if (state == ACTIVE) {
+
+		//This could take too long..
+		if(previousLattice != NULL) {
+			delete[] previousLattice;
+		}
+		
+		int* grid = (int*)CA->getCARule()->getLattice()->pFlatGrid;
+		int noElements = CA->getCARule()->getLattice()->noElements;
+		previousLattice = new int[noElements];
+
+		previousLattice = Util::deepArrayCopy(grid,noElements);
+
 		float timeTaken = CA->nextTimeStep();
 		qDebug("Time taken:%3.1f ms\n",timeTaken);
 
-			int DIM = CA->getCARule()->getLattice()->xDIM;
 
 //	for(int i = 0; i < DIM; i++) {
 		//for(int j = 0; j < DIM; j++) {
@@ -97,13 +178,11 @@ void CAController::tick(){
 		//}
 	//}
 	}
+}
+void CAController::viewTick(){
 	
-
-
-	//Draw constantly.
 	m_view->updateView(CA);
 }
-
 
 void CAController::parseDefinition(QStringList& lines) {
 
@@ -111,10 +190,17 @@ void CAController::parseDefinition(QStringList& lines) {
 	//parser = new LexiconParser();
 	//CA = parser->parseContent(lines);
 
+	//TEMP for now
+	setDimension(CAController::TWO);
+
 	RuleParser* parser = factory->createParser();
 
 	AbstractCellularAutomata* caRule = parser->parseContent(lines);
 	
+	if(CA != NULL) {
+		delete CA;
+	}
+
 	CA = new CellularAutomata_GPGPU();
 	CA->setCARule(caRule);
 
@@ -165,42 +251,87 @@ void CAController::setRandomLattice(int range){
 		newLattice->noBits = noBits;
 
 		CA->getCARule()->setLattice(newLattice);
+		CA->stepNumber = 0;
+
 		m_view->updateView(CA);
 		emit newCA(CA);
 	}
 }
 
 void CAController::createNewCA(const QString& type, int latticeSize, const QString& neighbourType, 
-								int numStates, const QList<int>& survNum,  const QList<int>& bornNum){
-	
-	CA = new CellularAutomata_GPGPU();
+	int numStates, const QList<int>& survNum,  const QList<int>& bornNum, AbstractLattice* lattice){
 
-	//Get lattice
-	AbstractLattice* lattice = factory->createLattice(latticeSize,neighbourType,2);
+		
+
+		if(lattice != NULL) {
+			//Copy lattice
+			int* grid = Util::deepArrayCopy((int*)lattice->pFlatGrid,lattice->noElements);
+			lattice = factory->createLattice(latticeSize,neighbourType,grid);
+		}
+		else {
+			lattice = factory->createLattice(latticeSize,neighbourType,1);
+		}
+
+		if(CA != NULL){
+			delete CA; //this will delete the lattice too.
+		}
+
+		//We can't delete our existing CA as the passed in lattice may belong to it.
+		CA = new CellularAutomata_GPGPU();
+
+		//Get lattice
+
+		//Get rule using lattice
+		AbstractCellularAutomata* caRule = factory->createRule(type);
+
+		caRule->setLattice(lattice);
+
+		Totalistic* totalistCaRule = dynamic_cast<Totalistic*>(caRule);
+
+		//Set states
+		totalistCaRule->setStates(numStates);
+
+		int survSize = survNum.size();
+		int* survNums = Util::createDynamicListFromQList(survNum);
+
+		int bornSize = bornNum.size();
+		int* bornNums = Util::createDynamicListFromQList(bornNum);
+
+		totalistCaRule->setSurviveNo(survNums,survSize);
+		totalistCaRule->setBornNo(bornNums,bornSize);
+
+		CA->setCARule(totalistCaRule);
+
+		m_view->updateView(CA);
+		emit newCA(CA);
+}
+
+void CAController::newCALoaded(CellularAutomata* ca) {
+
+	//When run for the first time after loaded, we want to store starting state.
+	if(initialLattice != NULL) {
+		delete[] initialLattice;
+	}
+
+	//Copy data.
+	int noElements = ca->getCARule()->getLattice()->noElements;
+	initialLattice = new int[noElements];
+
+	int* grid = (int*)ca->getCARule()->getLattice()->pFlatGrid;
+
+	initialLattice = Util::deepArrayCopy(grid,noElements);
+
+	changeState(LOADED);
+}
+
+void CAController::setTimerTick(int tick){
+	timerTick = tick;
+	caTimer.setInterval(timerTick);
+}
 
 
-	//Get rule using lattice
-	AbstractCellularAutomata* caRule = factory->createRule(type);
+void CAController::changeState(State newState){
 
-	caRule->setLattice(lattice);
-
-
-	Totalistic* totalistCaRule = dynamic_cast<Totalistic*>(caRule);
-
-	//Set states
-	totalistCaRule->setStates(numStates);
-
-	int survSize = survNum.size();
-	int* survNums = Util::createDynamicListFromQList(survNum);
-
-	int bornSize = bornNum.size();
-	int* bornNums = Util::createDynamicListFromQList(bornNum);
-
-	totalistCaRule->setSurviveNo(survNums,survSize);
-	totalistCaRule->setBornNo(bornNums,bornSize);
-
-	CA->setCARule(totalistCaRule);
-
-	m_view->updateView(CA);
-	emit newCA(CA);
+	state = newState;
+	emit newCAState(state);
 }

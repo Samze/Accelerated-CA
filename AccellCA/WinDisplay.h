@@ -11,6 +11,7 @@
 #include <qdebug.h>
 #include <QStringList>
 #include <QStringBuilder>
+#include <QFileSystemModel>
 
 #include "gl2ddrawer.h"
 #include "gl3ddrawer.h"
@@ -18,9 +19,10 @@
 
 #include "cellularautomatafactory.h"
 #include "factorymaker.h"
-#include "propertydialog.h"
 
 //typedef int (__cdecl *MYPROC)(LPWSTR); 
+
+#define MAX_TIMER_INTERVAL 500
 
 class WinDisplay : public QMainWindow, public ICAView
 {
@@ -30,40 +32,49 @@ class WinDisplay : public QMainWindow, public ICAView
 	public:
 		WinDisplay(QWidget *parent = 0, Qt::WFlags flags = 0);
 		~WinDisplay();
-		void setWindowTitle1(QString &title);
 		void updateView(CellularAutomata *ca);
 		void setController(CAController& controller);
 
 	private:
 		Ui::WinDisplayClass ui;
+		QFileSystemModel* dirModel;
+
 		void LoadFile(const QString &fileName);
 
 		QStringList fileContents;
 		GLDrawer* drawer;
 
+		bool newLatticeRequired;
+
 	private slots:
 		void newCALoaded(CellularAutomata *ca);
 		
+		void handleChangeState(CAController::State s);
+
+		void on_sldSpeed_valueChanged(int);
+		void on_treeView_clicked(QModelIndex index);
 		void on_btnRandom_clicked();
-		void on_btnEditRule_clicked();
 		void on_actionLoad_triggered();
-		void on_btnRestart_clicked();
 		void setDimension2D(bool);
 		void setGLDrawer(GLDrawer* drawer);
 	
-		void setupGUIElements();
+		void createDefaultCA();
+
 		void setupGUIElements(CellularAutomata *ca);
 
-		void on_btnCreateRule_clicked();
+		void newLatticeSettingsChanged();
+		void controlsChanged();
+
+		void updateRuleComboBoxes(CellularAutomata *ca);
 
 		void on_actionNew_triggered();
+
+		void setupConnections(bool);
+
 
 	signals:
 		void setCAFromMCLFormat(QStringList&);
 		void settingsChanged();
-
-	private:
-		int maxNeighbours; //Used to populate the Surv/Born state combo
 
 };
 

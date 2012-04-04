@@ -7,7 +7,7 @@
 
 #include "Generations3D.h"
 
-#include "Abstract3DCA.h"
+#include "Lattice3D.h"
 
 
 class CellularAutomata3DFactory : public CellularAutomataFactory
@@ -22,12 +22,13 @@ public:
 	virtual AbstractCellularAutomata* createRule(int size, int range);
 	
 	virtual AbstractLattice* createLattice(int size, const QString& neighbourhoodType, int random = 0);
+	virtual AbstractLattice* createLattice(int size, const QString& neighbourhoodType, int* grid);
 
 
 	virtual GLDrawer* createDrawer();
 
 	virtual RuleParser* createParser() {
-		return 0;
+		return 0; //There is no 3D parser yet.
 	}
 	
 };

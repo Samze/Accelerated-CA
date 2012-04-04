@@ -15,7 +15,7 @@ public:
 	virtual ~ICAView() {}
 
 	//This should all probably be slots
-	virtual void setWindowTitle1(QString &title) = 0;
+	//virtual void setWindowTitle1(QString &title) = 0;
 	virtual void updateView(CellularAutomata *ca) = 0;
 	virtual void setController(CAController& controller) = 0;
 

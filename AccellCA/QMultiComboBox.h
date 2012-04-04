@@ -56,6 +56,7 @@ public:
     QVariant itemData(int row);
 	void setItemData(int index, const QVariant &value, int role = Qt::UserRole);
 	int findText ( const QString & text, Qt::MatchFlags flags = static_cast<Qt::MatchFlags> ( Qt::MatchExactly | Qt::MatchCaseSensitive ));
+	void clear();
 
 signals:
 

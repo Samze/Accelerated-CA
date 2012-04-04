@@ -62,10 +62,11 @@ AbstractCellularAutomata* MCellParser::parseContent(QStringList& lines)
 
 	Generations* gen = new Generations();
 
-	Abstract2DCA* ca2d = new Abstract2DCA();
-	ca2d->neighbourhoodType = Abstract2DCA::MOORE;
+	Lattice2D* ca2d = new Lattice2D();
+	ca2d->neighbourhoodType = Lattice2D::MOORE;
 	ca2d->xDIM = DIM;
 	ca2d->yDIM = DIM;
+	ca2d->noElements = DIM * DIM;
 	
 	gen->lattice = ca2d;
 

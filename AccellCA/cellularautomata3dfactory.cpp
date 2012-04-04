@@ -15,11 +15,11 @@ AbstractCellularAutomata* CellularAutomata3DFactory::createRule(const QString& t
 	
 
 	if(type == "Generations"){
-		Generations3D* gen3D = new Generations3D();
-		return gen3D;
+		Generations3D* caRule = new Generations3D();
+		return caRule;
 	}else if(type == "Outer Totalistic"){
-		Generations3D* gen3D = new Generations3D();
-		return gen3D;
+		OuterTotalistic3D* caRule = new OuterTotalistic3D();
+		return caRule;
 	}
 	else {
 		qWarning("Type not recognised");
@@ -29,20 +29,37 @@ AbstractCellularAutomata* CellularAutomata3DFactory::createRule(const QString& t
 
 AbstractLattice* CellularAutomata3DFactory::createLattice(int size, const QString& neighbourhoodType, int random){
 
-		//Create our 2D Lattice and add it to our rule.
-	Abstract3DCA* lattice = new Abstract3DCA(size,size,size,random);
+	//Create our 2D Lattice and add it to our rule.
+	Lattice3D* lattice = new Lattice3D(size,size,size,random);
 
 	if(neighbourhoodType == "Moore"){
-		lattice->neighbourhoodType = Abstract3DCA::MOORE_3D;
+		lattice->neighbourhoodType = Lattice3D::MOORE_3D;
 	}
 	else if(neighbourhoodType == "Von Neumann"){
-		lattice->neighbourhoodType = Abstract3DCA::VON_NEUMANN_3D;
+		lattice->neighbourhoodType = Lattice3D::VON_NEUMANN_3D;
 	}
 	else {
 		qWarning("Neighbourhood type not recognised");
 	}
 	return lattice;
 }
+
+AbstractLattice* CellularAutomata3DFactory::createLattice(int size, const QString& neighbourhoodType, int* grid){
+
+	Lattice3D* lattice = new Lattice3D(grid,size,size,size);
+
+	if(neighbourhoodType == "Moore"){
+		lattice->neighbourhoodType = Lattice3D::MOORE_3D;
+	}
+	else if(neighbourhoodType == "Von Neumann"){
+		lattice->neighbourhoodType = Lattice3D::VON_NEUMANN_3D;
+	}
+	else {
+		qWarning("Neighbourhood type not recognised");
+	}
+	return lattice;
+}
+
 
 AbstractCellularAutomata* CellularAutomata3DFactory::createRule(int size, int range) {
 	
@@ -80,8 +97,8 @@ AbstractCellularAutomata* CellularAutomata3DFactory::createRule(int size, int ra
 	//survNo[0] = 26;
 
 	//Create our 2D Lattice and add it to our rule.
-	Abstract3DCA* lattice = new Abstract3DCA(size,size,size,range);
-	lattice->neighbourhoodType = Abstract3DCA::MOORE_3D;
+	Lattice3D* lattice = new Lattice3D(size,size,size,range);
+	lattice->neighbourhoodType = Lattice3D::MOORE_3D;
 
 	generations->lattice = lattice;
 

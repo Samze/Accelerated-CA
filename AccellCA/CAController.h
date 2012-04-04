@@ -16,6 +16,8 @@
 
 class ICAView;
 
+class Util;
+
 class CAController : public QObject
 {
 	Q_OBJECT
@@ -28,14 +30,15 @@ public: //singleton pattern
 	}
 
 	enum State {
-       IDLE,
+	   EMPTY,	
+       LOADED,
 	   ACTIVE,
 	   STOPPED
     };
 	
 	enum Dimension {
-		TWO,
-		THREE
+		TWO = 2,
+		THREE = 3
 	};
 
 public:
@@ -48,7 +51,10 @@ public:
 	void setRandomLattice(int range);
 
 	void createNewCA(const QString& type, int latticeSize, const QString& neighbourType, 
-								int numStates, const QList<int>& survNum,  const QList<int>& bornNum);
+								int numStates, const QList<int>& survNum,  const QList<int>& bornNum, AbstractLattice* lattice = 0);
+
+	void setTimerTick(int timerTick);
+
 private: 
 	CAController(); //private contructor, singleton pattern
 	CAController(QObject *parent); 
@@ -66,22 +72,38 @@ private:
 	
 private:
 	ICAView *m_view; //Weak assosiation, do not release.
-	QTimer timer;
+
+	QTimer viewTimer;
+	QTimer caTimer;
+
+	
+	int* initialLattice;
+	int* previousLattice;
 
 	void startSCIARA();
 
 signals:
 	void newDrawElement(GLDrawer*);
 	void newCA(CellularAutomata*);
+	void newCAState(CAController::State);
 
 private slots:
+
+	void restart();
+	void back();
 	void start();
 	void stop();
-	void step(); //should link to tick
-	void restart();
-	void tick();
+	void forward();
+	void forwardN();
+
+	void caTick();
+	void viewTick();
 	void parseDefinition(QStringList& lines);
 	void setRulesToCA();
+
+	void newCALoaded(CellularAutomata*);
+
+	void changeState(State);
 };
 
 #endif // CACONTROLLER_H

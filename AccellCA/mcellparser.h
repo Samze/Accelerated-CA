@@ -42,3 +42,4 @@ private:
 };
 
 #endif // MCELLPARSER_H
+

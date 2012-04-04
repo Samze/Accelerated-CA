@@ -8,7 +8,7 @@ GLDrawer::GLDrawer() {
 GLDrawer::GLDrawer(QWidget *parent)
 	: QGLWidget(parent), CA(0)
 {
-	setGeometry(parent->geometry());
+	//setGeometry(parent->geometry());
 	//flicker problem because of a widget attribute...this may be the soltuion.
 	setAttribute(Qt::WidgetAttribute::WA_OpaquePaintEvent );
 
@@ -26,8 +26,6 @@ void GLDrawer::initializeGL() {
 
 	int val = QGLWidget::context()->format().openGLVersionFlags();
 
-
-
     glDisable(GL_TEXTURE_2D); // no need for setting the depth up
     glDisable(GL_DEPTH_TEST);
 
@@ -35,26 +33,34 @@ void GLDrawer::initializeGL() {
     glEnable(GL_BLEND);
     glEnable(GL_POLYGON_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0, 0, 0, 0);
+
+    glClearColor(0.2, 0.2, 0.2, 1);
 }
 
 void GLDrawer::paintGL(){
-	
-    glClear(GL_COLOR_BUFFER_BIT);
+
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	if(CA != NULL) {
-	////this should not be passed
+		////this should not be passed
 
-	unsigned int DIM = CA->getCARule()->getLattice()->xDIM;
+		unsigned int DIM = CA->getCARule()->getLattice()->xDIM;
 
-	float cellSpace = (float) width() / DIM;
+		float cellSpace;
+		if(width() > height())
+			cellSpace = (float) height() / DIM;
+		else {
+			cellSpace = (float) width() / DIM;
+		}
 
-	void* grid = CA->getCARule()->getLattice()->pFlatGrid;
 
-	unsigned int* intGrid = (unsigned int*)grid;
 
-	for(int i = 0; i < DIM; ++i) {
-		for(int j = 0; j < DIM; ++j) {
+		void* grid = CA->getCARule()->getLattice()->pFlatGrid;
+
+		unsigned int* intGrid = (unsigned int*)grid;
+
+		for(int i = 0; i < DIM; ++i) {
+			for(int j = 0; j < DIM; ++j) {
 				if (intGrid[i * DIM + j] > 0) {
 					//draw!
 
@@ -66,113 +72,41 @@ void GLDrawer::paintGL(){
 				}
 			}
 		}
-
-	return;
-	SCIARA2::Cell* cellGrid = (SCIARA2::Cell*)grid;
-
-	//TODO this is bad.
-	for(int i = 0; i < DIM; i++) {
-		for(int j = 0; j < DIM; j++) {	
-			if (cellGrid[i * DIM + j].altitude > 0) { 
-
-				SCIARA2::Cell cell = cellGrid[i * DIM + j];
-				float altitude = cell.altitude;
-				float thickness = cell.thickness;
-
-				float  flowN = cell.outflow[0];
-				float  flowE = cell.outflow[1];
-				float  flowW = cell.outflow[2];
-				float  flowS = cell.outflow[3];
-			
-
-				float flowAvg = (float) (flowN + flowE + flowS + flowW) / 4;
-				
-				if(j == 10) {
-					//qDebug("x = %d, y = %d, alti = %3.3f, thick = %3.3f, flowN = %3.3f, flowE = %3.3f, flowS = %3.3f, flowW = %3.3f", i,j, altitude,thickness,flowN,flowE,flowS,flowW);
-				}
-				if (thickness != 0) {
-					CellPos pos;
-					pos.x = i;
-					pos.y = j;
-					drawCell(pos,cellSpace,(int)thickness);
-				}
-
-			}
-		}
-	}
-
 	}
 }
-	
-	//glTranslatef(1.0f,0.0f,0.0f);
-
- //   glBegin(GL_POLYGON);
-	//	glVertex2f(0,0);
-	//	glVertex2f(100,300);
-	//	glVertex2f(300,100);
- //   glEnd();
-
-
-//void GLDrawer::drawCell(int x, int y, float cellSpace, int state) {
-//
-//	float r = 0;
-//	float g = 0;
-//	float b = 0;
-//
-//	/*int states = CA->getCARule()->getNoStates();*/
-//	int states = CA->getDIM() * CA->getDIM() * CA->getDIM();
-//
-//	//float colourValue = 1 - ((float)state / states);
-//	//r = colourValue;
-//
-//	
-//	float third = (float)states / 3;
-//
-//	////float r = state < third ? state/third : 0;
-//	////float g = state < third && state < third * 2 ? state/third * 2: 0;
-//	////float b = state < third * 3? state/third * 3: 0;
-//
-//	int stateRange = (state / third);
-//
-//	int val = state - (stateRange * third);
-//
-//	float colourValue = 1 - ((float)val / third);
-//	
-//	if(stateRange == 0) r = colourValue;
-//	if(stateRange == 1) g = colourValue;
-//	if(stateRange >= 2) b = colourValue;
-//
-//
-//
-//	glColor3f(r,g,b);
-//
-//
-//	glLoadIdentity();
-//	glTranslatef(x* cellSpace,y * cellSpace,0.0f);
-//	glScalef(cellSpace - 1, cellSpace - 1, 0.0f); //minus an ammount here to get a "grid" look if desired
-//	//glScalef(9.0, 9.0,0.0f);
-//	glBegin(GL_QUADS);
-//		glVertex2f(0,0); //top left
-//		glVertex2f(1,0); //top right
-//		glVertex2f(1,1); //bottom right
-//		glVertex2f(0,1); //bottom left
-//	glEnd();
-//}
 
 //ran on opening scene too
 void GLDrawer::resizeGL(int w, int h){
 
+	//center our viewport
+	int dX = 0;
+	int dY = 0;
+
+	if(w > h) {
+		dX = w - h;
+		w = h;
+	}
+	else {
+		dY = h - w;
+		h = w;
+	}
+
+	dX /= 2;
+	dY /= 2;
+
 	//setup view
-	glViewport(0, 0, w, h);
+	glViewport(dX, dY, w, h);
 	
 	//clean slate && origin set to top left
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-	glOrtho(0, w, h, 0, -1, 1);
+	glOrtho(0, w, 0, h, -1, 1);
 
 	//set model and reset matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+	updateGL();
 }
 
 void GLDrawer::mousePressEvent(QMouseEvent *event) {

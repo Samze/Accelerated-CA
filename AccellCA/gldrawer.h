@@ -5,7 +5,6 @@
 #include <QtGui/QMouseEvent>
 #include "qgl.h"
 #include "CellularAutomata.h"
-#include "SCIARA2.h"
 /**
 	This class is an implement of QTs support for openGL. It inherits from QGLWidget
 	which offers familiar openGL methods such as paint, init etc. This class is used

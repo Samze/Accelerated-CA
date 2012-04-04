@@ -28,13 +28,16 @@ QMultiComboBox::QMultiComboBox(QWidget *widget ) :
     popframe_.layout()->setContentsMargins(0,0,0,0);
 
     connect(&vlist_, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(scanItemSelect(QListWidgetItem*)));
-
 }
 
 
 QMultiComboBox::~QMultiComboBox()
 {
     disconnect(&vlist_,0,0,0);
+}
+
+void QMultiComboBox::clear() {
+	vlist_.clear();
 }
 
 
