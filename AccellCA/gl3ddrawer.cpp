@@ -3,7 +3,6 @@
 GL3DDrawer::GL3DDrawer() {
 	
 	//TODO These are all specific to 3D, should not be here
-
 	VBO = new QGLBuffer(QGLBuffer::VertexBuffer);
 	IBO = new QGLBuffer(QGLBuffer::IndexBuffer);
 
@@ -15,6 +14,9 @@ GL3DDrawer::GL3DDrawer() {
 	setupVBO = false;
 
 	setFocusPolicy(Qt::FocusPolicy::ClickFocus);
+
+	vertexList = NULL;
+	indexList = NULL;
 	
 }
 
@@ -32,15 +34,25 @@ GL3DDrawer::GL3DDrawer(QWidget *parent) : GLDrawer(parent)
 	mouseCurrentlyDown = false;
 	setupVBO = false;
 
-
 	setFocusPolicy(Qt::FocusPolicy::ClickFocus);
+	
+	vertexList = NULL;
+	indexList = NULL;
 }
 
 GL3DDrawer::~GL3DDrawer()
 {
-	
+	if(vertexList != NULL)
+		delete[] vertexList;
+
+	if(indexList != NULL)
+		delete[] indexList;
+
 	VBO->release(QGLBuffer::VertexBuffer);
 	IBO->release(QGLBuffer::IndexBuffer);
+
+	delete VBO;
+	delete IBO;
 }
 
 void GL3DDrawer::paintGL(){

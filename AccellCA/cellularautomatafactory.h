@@ -6,6 +6,12 @@
 #include "gldrawer.h"
 #include "ruleparser.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+
 //TODO make this a singleton.
 class CellularAutomataFactory : public QObject
 {
@@ -13,7 +19,7 @@ class CellularAutomataFactory : public QObject
 
 public:
 	CellularAutomataFactory(QObject *parent = 0);
-	virtual ~CellularAutomataFactory(); //Virutal contstructor this abstract factory?
+	virtual ~CellularAutomataFactory();
 	
 	virtual AbstractCellularAutomata* createRule(const QString& type) = 0;
 	

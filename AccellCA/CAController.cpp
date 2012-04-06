@@ -38,7 +38,7 @@ CAController::~CAController()
 		delete[] initialLattice;
 	}
 
-	if(previousLattice != NULL) {
+	if(previousLattice != NULL) {\
 		delete[] previousLattice;
 	}
 }
@@ -51,9 +51,9 @@ void CAController::setRule(AbstractCellularAutomata* caRule) {
 
 void CAController::setView(ICAView *view) {
 	m_view = view;
-	//Call back to the viewer giving them our optional GLwidget.
-	GLDrawer* drawer = factory->createDrawer();
-	emit newDrawElement(drawer);
+	////Call back to the viewer giving them our optional GLwidget.
+	//GLDrawer* drawer = factory->createDrawer();
+	//emit newDrawElement(drawer);
 }
 
 void CAController::start(){
@@ -88,7 +88,7 @@ void CAController::back() {
 		delete[] grid;
 
 		//copy new one
-		CA->getCARule()->getLattice()->pFlatGrid = (void*)Util::deepArrayCopy(previousLattice, CA->getCARule()->getLattice()->noElements);
+		CA->getCARule()->getLattice()->pFlatGrid = (void*)Util::deepArrayCopy(previousLattice, CA->getCARule()->getLattice()->getNoElements());
 
 		CA->stepNumber -= 1;
 
@@ -137,7 +137,7 @@ void CAController::restart() {
 		delete[] grid;
 
 		//copy new one
-		CA->getCARule()->getLattice()->pFlatGrid = (void*)Util::deepArrayCopy(initialLattice, CA->getCARule()->getLattice()->noElements);
+		CA->getCARule()->getLattice()->pFlatGrid = (void*)Util::deepArrayCopy(initialLattice, CA->getCARule()->getLattice()->getNoElements());
 
 		CA->stepNumber = 0;
 
@@ -157,8 +157,7 @@ void CAController::caTick(){
 		}
 		
 		int* grid = (int*)CA->getCARule()->getLattice()->pFlatGrid;
-		int noElements = CA->getCARule()->getLattice()->noElements;
-		previousLattice = new int[noElements];
+		int noElements = CA->getCARule()->getLattice()->getNoElements();
 
 		previousLattice = Util::deepArrayCopy(grid,noElements);
 
@@ -206,10 +205,16 @@ void CAController::parseDefinition(QStringList& lines) {
 
 	m_view->updateView(CA);
 	emit newCA(CA);
+
+	delete parser;
 }
 
 
 void CAController::setDimension(Dimension dim){
+
+	if(factory != NULL) {
+		delete factory;
+	}
 	//Set our factory to our type of CA.
 	factory = FactoryMaker::GetFactory(dim);
 
@@ -237,18 +242,18 @@ void CAController::resetForNewLoad() {
 void CAController::setRandomLattice(int range){
 	
 	if(CA != NULL) {
-		int size = CA->getCARule()->getLattice()->xDIM;
-		int neigh = CA->getCARule()->getLattice()->neighbourhoodType;
+		int size = CA->getCARule()->getLattice()->getXSize();
+		int neigh = CA->getCARule()->getLattice()->getNeighbourhoodType();
 
 		QString neighStr = Util::getNeighbourhoodName(neigh);
 
 		AbstractLattice* newLattice = factory->createLattice(size,neighStr,range);
 		
 		//HOTFIX this needs fixing in the framework, this is temp fix.
-		int maxBits = CA->getCARule()->getLattice()->maxBits;
-		int noBits = CA->getCARule()->getLattice()->noBits;
-		newLattice->maxBits = maxBits;
-		newLattice->noBits = noBits;
+		int maxBits = CA->getCARule()->getLattice()->getMaxBits();
+		int noBits = CA->getCARule()->getLattice()->getNoBits();
+		newLattice->setMaxBits(maxBits);
+		newLattice->setNoBits(noBits);
 
 		CA->getCARule()->setLattice(newLattice);
 		CA->stepNumber = 0;
@@ -265,7 +270,7 @@ void CAController::createNewCA(const QString& type, int latticeSize, const QStri
 
 		if(lattice != NULL) {
 			//Copy lattice
-			int* grid = Util::deepArrayCopy((int*)lattice->pFlatGrid,lattice->noElements);
+			int* grid = Util::deepArrayCopy((int*)lattice->pFlatGrid,lattice->getNoElements());
 			lattice = factory->createLattice(latticeSize,neighbourType,grid);
 		}
 		else {
@@ -276,10 +281,7 @@ void CAController::createNewCA(const QString& type, int latticeSize, const QStri
 			delete CA; //this will delete the lattice too.
 		}
 
-		//We can't delete our existing CA as the passed in lattice may belong to it.
 		CA = new CellularAutomata_GPGPU();
-
-		//Get lattice
 
 		//Get rule using lattice
 		AbstractCellularAutomata* caRule = factory->createRule(type);
@@ -314,8 +316,7 @@ void CAController::newCALoaded(CellularAutomata* ca) {
 	}
 
 	//Copy data.
-	int noElements = ca->getCARule()->getLattice()->noElements;
-	initialLattice = new int[noElements];
+	int noElements = ca->getCARule()->getLattice()->getNoElements();
 
 	int* grid = (int*)ca->getCARule()->getLattice()->pFlatGrid;
 

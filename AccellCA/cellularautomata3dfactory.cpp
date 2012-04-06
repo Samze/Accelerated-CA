@@ -33,10 +33,10 @@ AbstractLattice* CellularAutomata3DFactory::createLattice(int size, const QStrin
 	Lattice3D* lattice = new Lattice3D(size,size,size,random);
 
 	if(neighbourhoodType == "Moore"){
-		lattice->neighbourhoodType = Lattice3D::MOORE_3D;
+		lattice->setNeighbourhoodType(Lattice3D::MOORE_3D);
 	}
 	else if(neighbourhoodType == "Von Neumann"){
-		lattice->neighbourhoodType = Lattice3D::VON_NEUMANN_3D;
+		lattice->setNeighbourhoodType(Lattice3D::VON_NEUMANN_3D);
 	}
 	else {
 		qWarning("Neighbourhood type not recognised");
@@ -49,10 +49,10 @@ AbstractLattice* CellularAutomata3DFactory::createLattice(int size, const QStrin
 	Lattice3D* lattice = new Lattice3D(grid,size,size,size);
 
 	if(neighbourhoodType == "Moore"){
-		lattice->neighbourhoodType = Lattice3D::MOORE_3D;
+		lattice->setNeighbourhoodType(Lattice3D::MOORE_3D);
 	}
 	else if(neighbourhoodType == "Von Neumann"){
-		lattice->neighbourhoodType = Lattice3D::VON_NEUMANN_3D;
+		lattice->setNeighbourhoodType(Lattice3D::VON_NEUMANN_3D);
 	}
 	else {
 		qWarning("Neighbourhood type not recognised");
@@ -98,7 +98,7 @@ AbstractCellularAutomata* CellularAutomata3DFactory::createRule(int size, int ra
 
 	//Create our 2D Lattice and add it to our rule.
 	Lattice3D* lattice = new Lattice3D(size,size,size,range);
-	lattice->neighbourhoodType = Lattice3D::MOORE_3D;
+	lattice->setNeighbourhoodType(Lattice3D::MOORE_3D);
 
 	generations->lattice = lattice;
 

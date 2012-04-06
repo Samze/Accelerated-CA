@@ -44,7 +44,7 @@ void GLDrawer::paintGL(){
 	if(CA != NULL) {
 		////this should not be passed
 
-		unsigned int DIM = CA->getCARule()->getLattice()->xDIM;
+		unsigned int DIM = CA->getCARule()->getLattice()->getXSize();
 
 		float cellSpace;
 		if(width() > height())

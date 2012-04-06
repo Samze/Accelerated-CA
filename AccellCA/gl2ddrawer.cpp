@@ -12,7 +12,7 @@ GL2DDrawer::GL2DDrawer(QWidget *parent)
 
 GL2DDrawer::~GL2DDrawer()
 {
-
+	qDebug("B");
 }
 
 void GL2DDrawer::drawCell(CellPos pos, float cellSpace,int state) {

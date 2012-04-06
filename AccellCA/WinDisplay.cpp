@@ -3,14 +3,15 @@
 WinDisplay::WinDisplay(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
+
 	ui.setupUi(this);
-	
-	CAController& controller = CAController::getInstance();
-	controller.setView(this);
 
 	//Null this
 	drawer = NULL;
 
+	CAController& controller = CAController::getInstance();
+
+	controller.setView(this);
 	//Maybe should store controller as a member variable using something like this..
 	//CAController* controller = &CAController::getInstance();
 
@@ -53,7 +54,8 @@ WinDisplay::WinDisplay(QWidget *parent, Qt::WFlags flags)
 
 WinDisplay::~WinDisplay()
 {
-
+	delete dirModel;
+	delete drawer;
 }
 
 void WinDisplay::setupConnections(bool enableConnections) {
@@ -140,7 +142,7 @@ void WinDisplay::setupGUIElements(CellularAutomata *ca) {
 	QString gameType = QString::fromStdString(ca->getRuleName());
 	Totalistic* totalisticCA = dynamic_cast<Totalistic*>(ca->getCARule());
 	
-	int maxNeighbourhood = totalisticCA->getLattice()->neighbourhoodType;
+	int maxNeighbourhood = totalisticCA->getLattice()->getNeighbourhoodType();
 
 	int dim = Util::getDimensionType(maxNeighbourhood);
 
@@ -195,7 +197,7 @@ void WinDisplay::setupGUIElements(CellularAutomata *ca) {
 void WinDisplay::updateRuleComboBoxes(CellularAutomata *ca) {
 
 	Totalistic* totalisticCA = dynamic_cast<Totalistic*>(ca->getCARule());
-	int maxNeighbours = totalisticCA->getLattice()->neighbourhoodType;
+	int maxNeighbours = totalisticCA->getLattice()->getNeighbourhoodType();
 
 	//Set surv numbers
 	ui.cboSurvStates->clear();
@@ -418,6 +420,7 @@ void WinDisplay::on_btnRandom_clicked(){
 	int random = ui.txtRange->text().toInt();
 
 	controller->setRandomLattice(random);
+
 }
 
 void WinDisplay::on_actionNew_triggered(){

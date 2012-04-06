@@ -5,6 +5,13 @@
 #include <QtGui/QMouseEvent>
 #include "qgl.h"
 #include "CellularAutomata.h"
+
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+
 /**
 	This class is an implement of QTs support for openGL. It inherits from QGLWidget
 	which offers familiar openGL methods such as paint, init etc. This class is used
@@ -35,7 +42,7 @@ public:
 	* A destructor. 
 	* Default destructor.
 	*/
-	~GLDrawer();
+	virtual ~GLDrawer();
 
 	/**
 	* Representation of a Cellular Automata class, this should probably be

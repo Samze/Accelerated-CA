@@ -20,6 +20,12 @@
 #include "cellularautomatafactory.h"
 #include "factorymaker.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+
 //typedef int (__cdecl *MYPROC)(LPWSTR); 
 
 #define MAX_TIMER_INTERVAL 500

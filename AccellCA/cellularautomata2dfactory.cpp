@@ -39,7 +39,7 @@ AbstractCellularAutomata* CellularAutomata2DFactory::createRule(int size, int ra
 
 	//Create our 2D Lattice and add it to our rule.
 	Lattice2D* lattice = new Lattice2D(size,size,range);
-	lattice->neighbourhoodType = Lattice2D::MOORE;
+	lattice->setNeighbourhoodType(Lattice2D::MOORE);
 
 	generations->lattice = lattice;
 
@@ -61,10 +61,10 @@ AbstractLattice* CellularAutomata2DFactory::createLattice(int size, const QStrin
 	Lattice2D* lattice = new Lattice2D(size,size,random);
 
 	if(neighbourhoodType == "Moore"){
-		lattice->neighbourhoodType = Lattice2D::MOORE;
+		lattice->setNeighbourhoodType(Lattice2D::MOORE);
 	}
 	else if(neighbourhoodType == "Von Neumann"){
-		lattice->neighbourhoodType = Lattice2D::VON_NEUMANN;
+		lattice->setNeighbourhoodType(Lattice2D::VON_NEUMANN);
 	}
 	else {
 		qWarning("Neighbourhood type not recognised");
@@ -72,15 +72,14 @@ AbstractLattice* CellularAutomata2DFactory::createLattice(int size, const QStrin
 	return lattice;
 }
 
-AbstractLattice* CellularAutomata2DFactory::createLattice(int size, const QString& neighbourhoodType, int* grid){
-	
+AbstractLattice* CellularAutomata2DFactory::createLattice(int size, const QString& neighbourhoodType, int* grid){	
 	Lattice2D* lattice = new Lattice2D(grid,size,size);
 
 	if(neighbourhoodType == "Moore"){
-		lattice->neighbourhoodType = Lattice2D::MOORE;
+		lattice->setNeighbourhoodType(Lattice2D::MOORE);
 	}
 	else if(neighbourhoodType == "Von Neumann"){
-		lattice->neighbourhoodType = Lattice2D::VON_NEUMANN;
+		lattice->setNeighbourhoodType(Lattice2D::VON_NEUMANN);
 	}
 	else {
 		qWarning("Neighbourhood type not recognised");
