@@ -201,6 +201,31 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Run using:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cboRunUsing">
+          <item>
+           <property name="text">
+            <string>GPU</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>CPU</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <widget class="QGroupBox" name="groupBox_2">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">

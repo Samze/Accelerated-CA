@@ -57,6 +57,7 @@ class WinDisplay : public QMainWindow, public ICAView
 		
 		void handleChangeState(CAController::State s);
 
+		void on_cboRunUsing_currentIndexChanged(int);
 		void on_sldSpeed_valueChanged(int);
 		void on_treeView_clicked(QModelIndex index);
 		void on_btnRandom_clicked();

@@ -288,6 +288,11 @@ void WinDisplay::controlsChanged(){
 	//Tell our controller we're switching the dimension
 	controller->setDimension(dimension);
 
+	//Get what hardware to run it on
+
+	QString hardware = ui.cboRunUsing->currentText();
+
+
 	AbstractLattice* lattice = controller->CA->getCARule()->getLattice();
 	if(lattice != NULL && newLatticeRequired == false) {
 		//Finally create our CA.
@@ -474,4 +479,18 @@ void WinDisplay::handleChangeState(CAController::State newState) {
 			break;
 	}
 
+}
+
+void WinDisplay::on_cboRunUsing_currentIndexChanged(int i) {
+
+	CAController& controller = CAController::getInstance();
+
+	if(i == 0) {
+		controller.setRunAsGPU(true);
+	}
+	else if(i == 1) {
+		controller.setRunAsGPU(false);
+	}
+
+	controlsChanged();
 }

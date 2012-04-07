@@ -5,6 +5,7 @@
 #include "ICAView.h"
 #include <qtimer.h>
 #include "CellularAutomata_GPGPU.h"
+#include "CellularAutomata_CPU.h"
 #include "OuterTotalistic.h"
 #include <qregexp.h>
 #include <QStringList>
@@ -61,6 +62,8 @@ public:
 
 	void setTimerTick(int timerTick);
 
+	void setRunAsGPU(bool);
+
 private: 
 	CAController(); //private contructor, singleton pattern
 	CAController(QObject *parent); 
@@ -82,11 +85,11 @@ private:
 	QTimer viewTimer;
 	QTimer caTimer;
 
+	bool runGPU;
+
 	
 	int* initialLattice;
 	int* previousLattice;
-
-	void startSCIARA();
 
 signals:
 	void newDrawElement(GLDrawer*);

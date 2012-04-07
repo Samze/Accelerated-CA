@@ -18,6 +18,8 @@ CAController::CAController() {
 	previousLattice = NULL;
 	initialLattice = NULL;
 
+	runGPU = true;
+
 	connect(this,SIGNAL(newCA(CellularAutomata*)),this,SLOT(newCALoaded(CellularAutomata*)));
 
 }
@@ -281,7 +283,12 @@ void CAController::createNewCA(const QString& type, int latticeSize, const QStri
 			delete CA; //this will delete the lattice too.
 		}
 
-		CA = new CellularAutomata_GPGPU();
+		if(runGPU) {
+			CA = new CellularAutomata_GPGPU();
+		}
+		else {
+			CA = new CellularAutomata_CPU();
+		}
 
 		//Get rule using lattice
 		AbstractCellularAutomata* caRule = factory->createRule(type);
@@ -335,4 +342,8 @@ void CAController::changeState(State newState){
 
 	state = newState;
 	emit newCAState(state);
+}
+
+void CAController::setRunAsGPU(bool b) {
+	runGPU = b;
 }
