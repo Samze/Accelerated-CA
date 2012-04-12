@@ -323,7 +323,7 @@ void WinDisplay::updateView(CellularAutomata* ca) {
 	qDebug("Render time = %d", myTimer.elapsed());
 
 	//set step number
-	ui.lblStepNo->setText(QString("%1").arg(ca->stepNumber));
+	ui.lblStepNo->setText(QString("%1").arg(ca->getStepNumber()));
 }
 
 void WinDisplay::setController(CAController &controller) {

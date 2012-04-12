@@ -92,7 +92,7 @@ void CAController::back() {
 		//copy new one
 		CA->getCARule()->getLattice()->pFlatGrid = (void*)Util::deepArrayCopy(previousLattice, CA->getCARule()->getLattice()->getNoElements());
 
-		CA->stepNumber -= 1;
+		CA->setStepNumber(CA->getStepNumber() -1);
 
 		changeState(STOPPED);
 	}
@@ -141,7 +141,7 @@ void CAController::restart() {
 		//copy new one
 		CA->getCARule()->getLattice()->pFlatGrid = (void*)Util::deepArrayCopy(initialLattice, CA->getCARule()->getLattice()->getNoElements());
 
-		CA->stepNumber = 0;
+		CA->setStepNumber(0);
 
 		changeState(LOADED);
 	}
@@ -258,7 +258,7 @@ void CAController::setRandomLattice(int range){
 		newLattice->setNoBits(noBits);
 
 		CA->getCARule()->setLattice(newLattice);
-		CA->stepNumber = 0;
+		CA->setStepNumber(0);
 
 		m_view->updateView(CA);
 		emit newCA(CA);
